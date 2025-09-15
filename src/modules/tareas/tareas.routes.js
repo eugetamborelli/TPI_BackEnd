@@ -9,12 +9,20 @@ import {
     getTareasByPrioridad,
     getTareasByEmpleado,
     getTareasByPaciente,
+<<<<<<< HEAD
     getTareasByFecha,
+=======
+    getTareasByFecha
+>>>>>>> 8f92813 (add tarea module)
 } from "./tareas.controller.js";
 
 const router = Router();
 
+<<<<<<< HEAD
 router.get("/fecha", getTareasByFecha);
+=======
+// filters
+>>>>>>> 8f92813 (add tarea module)
 router.get("/estado/:estado", getTareasByEstado);
 router.get("/prioridad/:prioridad", getTareasByPrioridad);
 router.get("/empleado/:empleadoId", getTareasByEmpleado);

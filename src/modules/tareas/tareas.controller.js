@@ -79,6 +79,7 @@ export const getTareasByPaciente = (req, res) => {
 
         res.json(filtradas);
     }
+<<<<<<< HEAD
 };
 
 export const getTareasByFecha = (req, res) => {
@@ -118,3 +119,7 @@ export const getTareasByFecha = (req, res) => {
     res.json(filtradas);
 };
 
+=======
+
+};
+>>>>>>> 8f92813 (add tarea module)
