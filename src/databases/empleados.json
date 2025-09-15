@@ -1,1 +1,38 @@
-[]
+[
+  {
+    "id": 101,
+    "nombre": "Carla",
+    "apellido": "Méndez",
+    "dni": "32123456",
+    "rol": "recepcionista",
+    "area": "Administración de Turnos",
+    "updatedAt": "2025-09-15T22:57:25.109Z"
+  },
+  {
+    "id": 102,
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "dni": "28999111",
+    "rol": "médico",
+    "area": "Atención Médica",
+    "updatedAt": "2025-09-15T23:00:24.787Z"
+  },
+  {
+    "id": 103,
+    "nombre": "Mariana",
+    "apellido": "Sosa",
+    "dni": "30555123",
+    "rol": "encargado de stock",
+    "area": "Stock de Insumos",
+    "updatedAt": "2025-09-15T23:00:29.677Z"
+  },
+  {
+    "id": 104,
+    "nombre": "Ricardo",
+    "apellido": "Ibarra",
+    "dni": "27111222",
+    "rol": "administrador",
+    "area": "Facturación",
+    "updatedAt": "2025-09-15T23:00:33.426Z"
+  }
+]
