@@ -9,12 +9,12 @@ import {
     getTareasByPrioridad,
     getTareasByEmpleado,
     getTareasByPaciente,
-    getTareasByFecha,
+    getTareasByFecha
 } from "./tareas.controller.js";
 
 const router = Router();
 
-router.get("/fecha", getTareasByFecha);
+// filters
 router.get("/estado/:estado", getTareasByEstado);
 router.get("/prioridad/:prioridad", getTareasByPrioridad);
 router.get("/empleado/:empleadoId", getTareasByEmpleado);

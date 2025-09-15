@@ -9,7 +9,6 @@ const router = Router();
 router.use("/health", healthRoutes);
 // router.use("/turnos", turnoRoutes);
 router.use("/tareas", tareaRoutes);
-
 router.use("/medicos", medicosRoutes);
 
 export default router;
