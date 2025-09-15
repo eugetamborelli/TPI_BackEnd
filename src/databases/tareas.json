@@ -4,14 +4,14 @@
         "area": "gestion_de_turnos",
         "titulo": "Revisión de historia clínica",
         "descripcion": "Revisar historia clínica del paciente Juan Pérez",
-        "estado": "pendiente",
-        "fechaInicio": "2025-09-14",
+        "estado": "en_progreso",
+        "fechaInicio": "2025-09-01",
         "fechaFin": null,
         "prioridad": "alta",
         "empleadoId": 101,
         "pacienteId": 201,
         "proveedorId": null,
-        "observaciones": "Consultorio 3",
+        "observaciones": "Consulta reprogramada para el 25/09",
         "createdAt": "2025-09-08T10:00:00Z",
         "updatedAt": "2025-09-14T10:00:00Z"
     },
@@ -21,7 +21,7 @@
         "titulo": "Carga de estudios",
         "descripcion": "Subir resultados de análisis al sistema",
         "estado": "en_progreso",
-        "fechaInicio": "2025-09-14",
+        "fechaInicio": "2025-09-10",
         "fechaFin": null,
         "prioridad": "alta",
         "empleadoId": 102,
@@ -53,7 +53,7 @@
         "titulo": "Generar factura a obra social",
         "descripcion": "Emitir factura a OSDE por consulta de paciente",
         "estado": "finalizada",
-        "fechaInicio": "2025-09-10",
+        "fechaInicio": "2025-10-10",
         "fechaFin": "2025-09-12",
         "prioridad": "alta",
         "empleadoId": 104,
@@ -62,5 +62,17 @@
         "observaciones": "Factura electrónica emitida",
         "createdAt": "2025-09-30T09:00:00Z",
         "updatedAt": "2025-09-12T17:00:00Z"
+    },
+    {
+        "id": 1757906491313,
+        "area": "gestion_de_turnos",
+        "titulo": "Cancelación de turno",
+        "descripcion": "Cancelar turno del paciente por enfermedad",
+        "estado": "pendiente",
+        "fechaInicio": "2025-09-18",
+        "prioridad": "alta",
+        "empleadoId": 101,
+        "pacienteId": 202,
+        "observaciones": "Paciente con fiebre, reagendar para la próxima semana"
     }
 ]
