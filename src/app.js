@@ -26,4 +26,5 @@ app.set('views', path.join(__dirname, 'views'));
 // Rutas
 app.use("/", routes);
 
+
 export default app;
