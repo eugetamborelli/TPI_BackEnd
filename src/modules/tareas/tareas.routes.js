@@ -9,7 +9,6 @@ import {
     getTareasByPrioridad,
     getTareasByEmpleado,
     getTareasByPaciente,
-    getTareasByFecha
 } from "./tareas.controller.js";
 
 const router = Router();
