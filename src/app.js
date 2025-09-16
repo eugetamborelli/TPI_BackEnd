@@ -11,6 +11,6 @@ app.use(express.json());
 
 // Rutas
 app.use("/health", healthRoutes);
-app.use("tareas", tareasRoutes)
+app.use("/tareas", tareasRoutes)
 
 export default app;
