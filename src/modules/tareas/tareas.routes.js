@@ -10,7 +10,6 @@ import {
     getTareasByEmpleado,
     getTareasByPaciente,
     getTareasByFecha,
-    testFechas
 } from "./tareas.controller.js";
 
 const router = Router();
