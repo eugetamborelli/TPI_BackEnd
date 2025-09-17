@@ -1,16 +1,14 @@
 import express from "express";
 import cors from "cors";
-import healthRoutes from "./modules/health/health.routes.js";
+import routes from "./routes/index.js";
 
 const app = express();
 
-// Middlewares
+// Middlewares globales
 app.use(cors());
 app.use(express.json());
 
 // Rutas
-app.use("/health", healthRoutes);
-// app.use("/turnos", turnoRoutes);
-
+app.use("/api", routes);
 
 export default app;
