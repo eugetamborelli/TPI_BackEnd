@@ -1,0 +1,19 @@
+doctype html
+html
+  head
+    title Lista de Médicos
+  body
+    h1 Médicos
+
+    ul
+      each medico in medicos
+        li #{medico.nombre} - #{medico.especialidad} 
+          |  
+          a(href=`/medicos/${medico.id}`) Ver
+          |  
+          a(href=`/medicos/${medico.id}/edit`) Editar
+          |  
+          a(href=`/medicos/${medico.id}/delete`) Eliminar
+
+    br
+    a(href="/medicos/new") Agregar nuevo médico
