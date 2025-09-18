@@ -6,7 +6,7 @@ import routes from "./routes/index.js";
 
 import healthRoutes from "./modules/health/health.routes.js";
 import tareasRoutes from "./modules/tareas/tareas.routes.js";
-import medicosRoutes from "./routes/medicos.router.js";
+import medicosRoutes from "./modules/medicos/medicos.router.js";
 
 
 const app = express();

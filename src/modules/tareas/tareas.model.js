@@ -1,4 +1,5 @@
-import { writeTareasFile, readTareasFile } from "./tareas.utils"
+import { writeTareasFile, readTareasFile } from "./tareas.utils.js"
+
 
 export const getAllTareas = () => {
     return readTareasFile();
