@@ -82,45 +82,17 @@ class TareasController {
         } catch (error) {
             res.status(500).json({ error: "Error al filtrar por paciente" });
         }
+    };
 
-        res.json(filtradas);
-    }
-};
-
-export const getTareasByFecha = (req, res) => {
-    const { inicio, fin, tipo = 'inicio' } = req.query;
-    const tareas = getAllTareas();
-
-    if (!inicio && !fin) {
-        return res.json(tareas);
-    }
-
-    const filtradas = tareas.filter(t => {
-        let fechaAComparar;
-
-        switch (tipo) {
-            case 'creacion':
-                fechaAComparar = t.createdAt;
-                break;
-            case 'finalizacion':
-                fechaAComparar = t.fechaFin;
-                break;
-            case 'inicio':
-            default:
-                fechaAComparar = t.fechaInicio;
-                break;
+    getTareasByFecha = (req, res) => {
+        try {
+            const { inicio, fin, tipo = 'inicio' } = req.query;
+            const tareas = modelo.filtrarPorFecha(inicio, fin, tipo);
+            res.json(tareas.length > 0 ? tareas : { message: "No hay tareas en este rango" });
+        } catch (error) {
+            res.status(500).json({ error: "Error al filtrar por fecha" });
         }
+    };
+}
 
-        return isDateInRange(fechaAComparar, inicio, fin);
-    });
-
-    if (filtradas.length === 0) {
-        return res.status(200).json({
-            message: "No se encontraron tareas en el rango solicitado",
-            filtros: { inicio, fin, tipo }
-        });
-    }
-
-    res.json(filtradas);
-};
-
+export default new TareasController();
