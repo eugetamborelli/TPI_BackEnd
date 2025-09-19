@@ -69,3 +69,9 @@ export const writeEmpleadosFile = (empleados) => {
     return false;
   }
 };
+
+export const getNextId = (empleados) => {
+  if (!Array.isArray(empleados) || empleados.length === 0) return 1;
+  const maxId = Math.max(...empleados.map(e => Number(e.id) || 0));
+  return maxId + 1;
+};
