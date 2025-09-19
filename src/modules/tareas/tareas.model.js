@@ -39,10 +39,13 @@ class TareasModel {
         this.validarTarea(datos, false);
 
         const tareas = this.leerArchivo();
-        const nuevoId = tareas.length > 0 ? Math.max(...tareas.map(t => t.id)) + 1 : 1;
+
+        const idNuevo = tareas.length > 0
+            ? tareas.reduce((maxId, t) => t.id > maxId ? t.id : maxId, 0) + 1
+            : 1;
 
         const nuevaTarea = {
-            id: nuevoId,
+            id: idNuevo,
             titulo: datos.titulo.trim(),
             descripcion: datos.descripcion.trim(),
             estado: datos.estado.toLowerCase(),
