@@ -11,6 +11,5 @@ router.use("/health", healthRoutes);
 router.use("/tareas", tareaRoutes);
 router.use("/medicos", medicosRoutes);
 
-router.use("/medicos", medicosRoutes);
 
 export default router;
