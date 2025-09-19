@@ -1,42 +1,32 @@
 // src/modules/empleados/empleados.model.js
-import { readEmpleadosFile, writeEmpleadosFile } from "./empleados.utils.js";
+// src/modules/empleados/empleados.model.js
+import { readEmpleadosFile, writeEmpleadosFile, getNextId } from "./empleados.utils.js";
 
 class EmpleadosModel {
-  // === helpers privados ===
-  #all() {
-    return readEmpleadosFile();
-  }
+  #all() { return readEmpleadosFile(); }
+  #save(data) { writeEmpleadosFile(data); }
 
-  #save(data) {
-    writeEmpleadosFile(data);
-  }
-
-  // === API pública del modelo ===
-  getAll() {
-    return this.#all();
-  }
+  getAll() { return this.#all(); }
 
   getById(id) {
-    const empleados = this.#all();
-    return empleados.find((e) => e.id === Number(id));
+    return this.#all().find((e) => e.id === Number(id));
   }
 
   create(empleado) {
     const empleados = this.#all();
 
-    // 1) Tomar ID manual si viene; si no, generar uno
-    const id = empleado.id != null ? Number(empleado.id) : Date.now();
+    // 1) ID autoincremental si no viene
+    const id = empleado.id != null ? Number(empleado.id) : getNextId(empleados);
     if (!Number.isFinite(id)) return null;
 
-    // 2) Validar unicidad de id (y opcionalmente de dni)
+    // 2) Unicidad de id y dni
     const dni = String(empleado.dni ?? "");
     const idYaExiste = empleados.some((e) => e.id === id);
     const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
-    if (idYaExiste || dniYaExiste) return null; // conflicto -> que lo maneje el controller
+    if (idYaExiste || dniYaExiste) return null;
 
-    // 3) Timestamps
+    // 3) Timestamps y creación
     const now = new Date().toISOString();
-
     const nuevo = {
       id,
       nombre: empleado.nombre,
@@ -58,24 +48,16 @@ class EmpleadosModel {
     const index = empleados.findIndex((e) => e.id === Number(id));
     if (index === -1) return null;
 
-    // No permitir cambiar id ni createdAt desde el patch
     const { id: _ignoreId, createdAt: _ignoreCreatedAt, ...rest } = patch;
 
-    // Si cambia el DNI, verificar unicidad
+    // si cambia DNI, validar unicidad
     if (rest.dni != null) {
       const nuevoDni = String(rest.dni);
-      const existeOtroConMismoDni = empleados.some(
-        (e, i) => i !== index && String(e.dni) === nuevoDni
-      );
-      if (existeOtroConMismoDni) return null;
+      const existeOtro = empleados.some((e, i) => i !== index && String(e.dni) === nuevoDni);
+      if (existeOtro) return null;
     }
 
-    empleados[index] = {
-      ...empleados[index],
-      ...rest,
-      updatedAt: new Date().toISOString(),
-    };
-
+    empleados[index] = { ...empleados[index], ...rest, updatedAt: new Date().toISOString() };
     this.#save(empleados);
     return empleados[index];
   }
@@ -85,20 +67,16 @@ class EmpleadosModel {
     const after = empleados.filter((e) => e.id !== Number(id));
     const borrado = after.length !== empleados.length;
     this.#save(after);
-    return borrado; 
+    return borrado;
   }
 
-  // === Filtros ===
+  // Filtros
   filterByRol(rol) {
-    const empleados = this.#all();
-    return empleados.filter((e) => (e.rol || "").toLowerCase() === rol.toLowerCase());
+    return this.#all().filter((e) => (e.rol || "").toLowerCase() === rol.toLowerCase());
   }
-
   filterByArea(area) {
-    const empleados = this.#all();
-    return empleados.filter((e) => (e.area || "").toLowerCase() === area.toLowerCase());
+    return this.#all().filter((e) => (e.area || "").toLowerCase() === area.toLowerCase());
   }
 }
 
-export default EmpleadosModel;           
-export const empleadosModel = new EmpleadosModel(); 
+export default EmpleadosModel;       
