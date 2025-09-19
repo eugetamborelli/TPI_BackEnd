@@ -75,7 +75,7 @@ export default class Paciente {
         }
 
         //No se permiten cambios en id, dni o createdAt
-        const {id, dni, createdAt, ...allowedUpdates} = datosPaciente;
+        const {id, dni: dniParam, createdAt, ...allowedUpdates} = datosPaciente;
 
         //Validaciones-campos obligatorios
         this.validatePacienteData(allowedUpdates, true);
@@ -97,7 +97,7 @@ export default class Paciente {
     //DELETE
     deletePaciente(dni) {
         let pacientes = readPacientesFile();
-        const index = pacientes.findIndex(p => p.dni === String(dni));
+        const index = pacientes.findIndex(p => p.dni === Number(dni));
 
         if (index === -1) {
             throw new Error(`Paciente con DNI ${dni} no encontrado`);
