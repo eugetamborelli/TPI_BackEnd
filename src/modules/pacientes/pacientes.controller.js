@@ -4,7 +4,7 @@ const pacienteModel = new Paciente();
 
 export const getPacientes = (req, res) => {
     try {
-        const pacientes = pacientesModel.getAllPacientes();
+        const pacientes = pacienteModel.getAllPacientes();
         res.json(pacientes);
     } catch (error) {
         res.status(500).json({error: error.message});
