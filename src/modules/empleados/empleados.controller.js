@@ -1,70 +1,89 @@
-import {
-  getAllEmpleados,
-  getEmpleadoById,
-  createEmpleado,
-  updateEmpleado,
-  deleteEmpleado,
-} from "./empleados.model.js";
+// src/modules/empleados/empleados.controller.js
+import EmpleadosModel from "./empleados.model.js";
 
-// CRUD
-export const getEmpleados = (req, res) => {
-  res.json(getAllEmpleados());
-};
+const model = new EmpleadosModel();
 
-export const getEmpleado = (req, res) => {
-  const emp = getEmpleadoById(req.params.id);
-  if (!emp) return res.status(404).json({ error: "Empleado no encontrado" });
-  res.json(emp);
-};
+class EmpleadosController {
+  // CRUD
+  getEmpleados = (req, res) => {
+    try {
+      res.json(model.getAll());
+    } catch (err) {
+      res.status(500).json({ error: "Error al obtener empleados" });
+    }
+  };
 
-export const addEmpleado = (req, res) => {
-  const { id, nombre, apellido, dni, rol, area } = req.body;
+  getEmpleado = (req, res) => {
+    try {
+      const emp = model.getById(req.params.id);
+      if (!emp) return res.status(404).json({ error: "Empleado no encontrado" });
+      res.json(emp);
+    } catch (err) {
+      res.status(500).json({ error: "Error al obtener empleado" });
+    }
+  };
 
-  // Validación de campos obligatorios
-  if (!nombre || !apellido || !dni || !rol || !area) {
-    return res
-      .status(400)
-      .json({ error: "Campos obligatorios: nombre, apellido, dni, rol, area" });
-  }
+  addEmpleado = (req, res) => {
+    try {
+      const { id, nombre, apellido, dni, rol, area } = req.body;
 
-  // Crear empleado (permitiendo id manual)
-  const nuevo = createEmpleado({ id, nombre, apellido, dni, rol, area });
+      // Validación de campos obligatorios
+      if (!nombre || !apellido || !dni || !rol || !area) {
+        return res
+          .status(400)
+          .json({ error: "Campos obligatorios: nombre, apellido, dni, rol, area" });
+      }
 
-  if (!nuevo) {
-    // Conflicto por id o dni repetido
-    return res.status(409).json({ error: "ID o DNI ya existente" });
-  }
+      const nuevo = model.create({ id, nombre, apellido, dni, rol, area });
+      if (!nuevo) {
+        // Conflicto por id o dni repetido
+        return res.status(409).json({ error: "ID o DNI ya existente" });
+      }
 
-  res.status(201).json(nuevo);
-};
+      res.status(201).json(nuevo);
+    } catch (err) {
+      res.status(500).json({ error: "Error al crear empleado" });
+    }
+  };
 
-export const editEmpleado = (req, res) => {
-  const emp = updateEmpleado(req.params.id, req.body);
-  if (!emp) return res.status(404).json({ error: "Empleado no encontrado" });
-  res.json(emp);
-};
+  editEmpleado = (req, res) => {
+    try {
+      const emp = model.update(req.params.id, req.body);
+      if (!emp) return res.status(404).json({ error: "Empleado no encontrado o DNI en uso" });
+      res.json(emp);
+    } catch (err) {
+      res.status(400).json({ error: "Error al actualizar empleado" });
+    }
+  };
 
-export const removeEmpleado = (req, res) => {
-  const ok = deleteEmpleado(req.params.id);
-  if (!ok) return res.status(404).json({ error: "Empleado no encontrado" });
-  res.json({ message: "Empleado eliminado" });
-};
+  removeEmpleado = (req, res) => {
+    try {
+      const ok = model.remove(req.params.id);
+      if (!ok) return res.status(404).json({ error: "Empleado no encontrado" });
+      res.json({ message: "Empleado eliminado" });
+    } catch (err) {
+      res.status(500).json({ error: "Error al eliminar empleado" });
+    }
+  };
 
-// Filtros
-export const getEmpleadosByRol = (req, res) => {
-  const { rol } = req.params;
-  const empleados = getAllEmpleados();
-  const filtrados = empleados.filter(
-    (e) => (e.rol || "").toLowerCase() === rol.toLowerCase()
-  );
-  res.json(filtrados);
-};
+  // Filtros
+  getEmpleadosByRol = (req, res) => {
+    try {
+      const { rol } = req.params;
+      res.json(model.filterByRol(rol));
+    } catch (err) {
+      res.status(500).json({ error: "Error al filtrar por rol" });
+    }
+  };
 
-export const getEmpleadosByArea = (req, res) => {
-  const { area } = req.params;
-  const empleados = getAllEmpleados();
-  const filtrados = empleados.filter(
-    (e) => (e.area || "").toLowerCase() === area.toLowerCase()
-  );
-  res.json(filtrados);
-};
+  getEmpleadosByArea = (req, res) => {
+    try {
+      const { area } = req.params;
+      res.json(model.filterByArea(area));
+    } catch (err) {
+      res.status(500).json({ error: "Error al filtrar por área" });
+    }
+  };
+}
+
+export default new EmpleadosController(); 
