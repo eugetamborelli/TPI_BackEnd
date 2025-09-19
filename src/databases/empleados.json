@@ -34,5 +34,15 @@
     "rol": "administrador",
     "area": "Facturación",
     "updatedAt": "2025-09-15T23:00:33.426Z"
+  },
+  {
+    "id": 105,
+    "nombre": "Lucía",
+    "apellido": "Fernández",
+    "dni": "30011222",
+    "rol": "enfermera",
+    "area": "Atención Médica",
+    "createdAt": "2025-09-19T16:40:24.164Z",
+    "updatedAt": "2025-09-19T16:40:24.164Z"
   }
 ]

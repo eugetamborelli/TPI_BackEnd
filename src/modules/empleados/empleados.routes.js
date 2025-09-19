@@ -1,25 +1,14 @@
 import { Router } from "express";
-import {
-  getEmpleados,
-  getEmpleado,
-  addEmpleado,
-  editEmpleado,
-  removeEmpleado,
-  getEmpleadosByRol,
-  getEmpleadosByArea,
-} from "./empleados.controller.js";
+import empleadosController from "./empleados.controller.js"; // export default new EmpleadosController()
 
 const router = Router();
 
-// filtros
-router.get("/rol/:rol", getEmpleadosByRol);
-router.get("/area/:area", getEmpleadosByArea);
-
-// CRUD
-router.get("/", getEmpleados);
-router.get("/:id", getEmpleado);
-router.post("/", addEmpleado);
-router.put("/:id", editEmpleado);
-router.delete("/:id", removeEmpleado);
+router.get("/rol/:rol", empleadosController.getEmpleadosByRol);
+router.get("/area/:area", empleadosController.getEmpleadosByArea);
+router.get("/", empleadosController.getEmpleados);
+router.get("/:id", empleadosController.getEmpleado);
+router.post("/", empleadosController.addEmpleado);
+router.put("/:id", empleadosController.editEmpleado);
+router.delete("/:id", empleadosController.removeEmpleado);
 
 export default router;
