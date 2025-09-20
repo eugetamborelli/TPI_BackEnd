@@ -2,18 +2,18 @@ import Paciente from "./pacientes.model.js";
 
 const pacienteModel = new Paciente();
 
-export const getPacientes = (req, res) => {
+export const getPacientes = async (req, res) => {
     try {
-        const pacientes = pacienteModel.getAllPacientes();
+        const pacientes = await pacienteModel.getAllPacientes();
         res.json(pacientes);
     } catch (error) {
         res.status(500).json({error: error.message});
     }
 }
 
-export const getPaciente = (req, res) => {
+export const getPaciente = async (req, res) => {
     try {
-        const paciente = pacienteModel.getPacienteByDni(req.params.dni);
+        const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
         res.json({
             mensaje: "Paciente localizado",
             paciente: paciente
@@ -23,9 +23,9 @@ export const getPaciente = (req, res) => {
     }
 }
 
-export const addPaciente = (req, res) => {
+export const addPaciente = async (req, res) => {
     try {
-        const nuevoPaciente = pacienteModel.addPaciente(req.body);
+        const nuevoPaciente = await pacienteModel.addPaciente(req.body);
         res.status(201).json({
             mensaje: "Paciente agregado correctamente",
             paciente: nuevoPaciente
@@ -35,9 +35,9 @@ export const addPaciente = (req, res) => {
     }
 }
 
-export const updatePaciente = (req, res) => {
+export const updatePaciente = async (req, res) => {
     try {
-        const pacienteActualizado = pacienteModel.updatePaciente(req.params.dni, req.body);
+        const pacienteActualizado = await pacienteModel.updatePaciente(req.params.dni, req.body);
         res.json({
             mensaje: "Paciente actualizado correctamente",
             paciente: pacienteActualizado
@@ -47,9 +47,9 @@ export const updatePaciente = (req, res) => {
     }
 }
 
-export const deletePaciente = (req, res) => {
+export const deletePaciente = async (req, res) => {
     try {
-        const pacienteEliminado = pacienteModel.deletePaciente(req.params.dni);
+        const pacienteEliminado = await pacienteModel.deletePaciente(req.params.dni);
         res.json({
             mensaje: "Paciente eliminado correctamente",
             paciente: pacienteEliminado
