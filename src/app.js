@@ -8,7 +8,12 @@ import routes from "./routes/index.js";
 //=======
 import healthRoutes from "./modules/health/health.routes.js";
 import tareasRoutes from "./modules/tareas/tareas.routes.js";
+//<<<<<<< HEAD
 //>>>>>>> 4baf3c5 (add tarea module)
+//=======
+import medicosRoutes from "./modules/medicos/medicos.router.js";
+
+//>>>>>>> 0cd9857 (cambios en rutas que estaban mal enlazadas.)
 
 import healthRoutes from "./modules/health/health.routes.js";
 import tareasRoutes from "./modules/tareas/tareas.routes.js";

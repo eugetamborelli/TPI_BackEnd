@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { validarEspecialidad, validarDisponibilidad } from "./medicos.utils.js";
-import { getAllTareas } from "./tareas.model.js"; // Para verificar turnos
+import { getAllTareas } from "../tareas/tareas.model.js"; // Para verificar turnos
 
 // Ruta del archivo JSON
 const filePath = path.resolve("src/databases/medicos.json");
