@@ -1,7 +1,9 @@
 import { Router } from "express";
 import {
-    getPacientes,
-    getPaciente,
+    renderDashboard,
+    renderNuevoPaciente,
+    renderEditarPaciente,
+    getPacientesListado,
     addPaciente,
     updatePaciente,
     deletePaciente
@@ -9,10 +11,15 @@ import {
 
 const router = Router();
 
-router.get("/", getPacientes);
-router.get("/:dni", getPaciente);
-router.post("/", addPaciente);
-router.patch("/:dni", updatePaciente);
+//Vistas
+router.get("/", renderDashboard);
+router.get("/nuevo-paciente", renderNuevoPaciente)
+router.get("/editar/:dni", renderEditarPaciente);
+
+//CRUD
+router.get("/listado", getPacientesListado);
+router.post("/nuevo-paciente", addPaciente);
+router.patch("/editar/:dni", updatePaciente);
 router.delete("/:dni", deletePaciente);
 
 export default router;

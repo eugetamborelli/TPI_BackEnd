@@ -5,7 +5,7 @@ export default class Paciente {
         this.id = id;
         this.nombre = nombre;
         this.apellido = apellido;
-        this.dni = dni;
+        this.dni = Number(dni);
         this.fechaNacimiento = fechaNacimiento;
         this.telefono = telefono;
         this.email = email;
@@ -16,13 +16,13 @@ export default class Paciente {
     }
 
     //GET
-    getAllPacientes() {
-        return readPacientesFile();
+    async getAllPacientes() {
+        return await readPacientesFile();
     }
 
-    getPacienteByDni(dni) {
-        const pacientes = readPacientesFile();
-        const paciente = pacientes.find(p => p.dni === Number(dni));
+    async getPacienteByDni(dni) {
+        const pacientes = await readPacientesFile();
+        const paciente = pacientes.find(p => Number(p.dni) === Number(dni));
 
         if(!paciente) {
         throw new Error(`Paciente con DNI ${dni} no encontrado`);
@@ -32,14 +32,14 @@ export default class Paciente {
     }
 
     //POST
-    addPaciente(datosPaciente) {
-        const pacientes = readPacientesFile();
+    async addPaciente(datosPaciente) {
+        const pacientes = await readPacientesFile();
 
         //Validaciones-campos obligatorios
-        this.validatePacienteData(datosPaciente);
+        validatePacienteData(datosPaciente);
 
         //Valida DNI
-        const dniExiste = pacientes.some(p => p.dni === datosPaciente.dni)
+        const dniExiste = pacientes.some(p => Number(p.dni) === Number(datosPaciente.dni))
         if (dniExiste) {
             throw new Error(`Ya existe un paciente con el DNI ${datosPaciente.dni}`);
         }
@@ -57,7 +57,7 @@ export default class Paciente {
 
         pacientes.push(nuevoPaciente);
 
-        const guardadoCorrecto = writePacientesFile(pacientes);
+        const guardadoCorrecto = await writePacientesFile(pacientes);
         if (!guardadoCorrecto) {
             throw new Error("Error al guardar el paciente");
         }
@@ -66,9 +66,9 @@ export default class Paciente {
     }
 
     //PATCH
-    updatePaciente(dni, datosPaciente) {
-        const pacientes = readPacientesFile();
-        const index = pacientes.findIndex(p => p.dni === Number(dni));
+    async updatePaciente(dni, datosPaciente) {
+        const pacientes = await readPacientesFile();
+        const index = pacientes.findIndex(p => Number(p.dni) === Number(dni));
 
         if (index === -1) {
             throw new Error(`Paciente con DNI ${dni} no encontrado`);
@@ -78,7 +78,7 @@ export default class Paciente {
         const {id, dni: dniParam, createdAt, ...allowedUpdates} = datosPaciente;
 
         //Validaciones-campos obligatorios
-        this.validatePacienteData(allowedUpdates, true);
+        validatePacienteData(allowedUpdates, true);
 
         pacientes[index] = {
             ...pacientes[index],
@@ -86,7 +86,7 @@ export default class Paciente {
             updatedAt : new Date().toISOString()
         }
 
-        const guardadoCorrecto = writePacientesFile(pacientes);
+        const guardadoCorrecto = await writePacientesFile(pacientes);
         if (!guardadoCorrecto) {
             throw new Error("Error al actualizar el paciente");
         }
@@ -95,9 +95,9 @@ export default class Paciente {
     }
 
     //DELETE
-    deletePaciente(dni) {
-        let pacientes = readPacientesFile();
-        const index = pacientes.findIndex(p => p.dni === Number(dni));
+    async deletePaciente(dni) {
+        let pacientes = await readPacientesFile();
+        const index = pacientes.findIndex(p => Number(p.dni) === Number(dni));
 
         if (index === -1) {
             throw new Error(`Paciente con DNI ${dni} no encontrado`);
@@ -107,61 +107,60 @@ export default class Paciente {
 
         pacientes.splice(index, 1);
         
-        const guardadoCorrecto = writePacientesFile(pacientes);
+        const guardadoCorrecto = await writePacientesFile(pacientes);
         if (!guardadoCorrecto) {
             throw new Error("Error al eliminar el paciente");
         }
 
         return pacienteBorrado;
     }
+}
 
-    //Validar datos y verificar campos obligatorios
-    validatePacienteData(datosPaciente, isUpdate = false) {
-        //Campos obligatorios - solo en creación de paciente
-        const requiredFields = ["nombre", "apellido", "dni", "fechaNacimiento", "telefono"];
-        for (const field of requiredFields) {
-            if (!isUpdate && !datosPaciente[field]) {
-                throw new Error(`El campo ${field} es obligatorio`);
-            }
-        }
-
-        //DNI numérico
-        if (datosPaciente.dni && isNaN(Number(datosPaciente.dni))) {
-            throw new Error("DNI debe ser un número válido");
-        }
-
-        //Fecha de nacimiento válida
-        if (datosPaciente.fechaNacimiento) {
-            const fecha = new Date(datosPaciente.fechaNacimiento);
-            if (isNaN(fecha.getTime()) || fecha > new Date()) {
-                throw new Error("Fecha de nacimiento inválida");
-            }
-        }
-
-        //Email válido
-        if (datosPaciente.email) {
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!emailRegex.test(datosPaciente.email)) {
-                throw new Error("Email inválido");
-            }
-        }
-
-        //Teléfono válido
-        if (datosPaciente.telefono) {
-            const telRegex = /^[0-9\s\-()+]+$/;
-            if (!telRegex.test(datosPaciente.telefono)) {
-                throw new Error("Teléfono inválido");
-            }
-        }
-
-        //Fecha de alta posterior a nacimiento
-        if (datosPaciente.fechaAlta && datosPaciente.fechaNacimiento) {
-            const nacimiento = new Date(datosPaciente.fechaNacimiento);
-            const alta = new Date(datosPaciente.fechaAlta);
-            if (alta < nacimiento) {
-                throw new Error("La fecha de alta no puede ser anterior a la fecha de nacimiento");
-            }
+//Validar datos y verificar campos obligatorios
+function validatePacienteData(datosPaciente, isUpdate = false) {
+    //Campos obligatorios - solo en creación de paciente
+    const requiredFields = ["nombre", "apellido", "dni", "fechaNacimiento", "telefono"];
+    for (const field of requiredFields) {
+        if (!isUpdate && !datosPaciente[field]) {
+            throw new Error(`El campo ${field} es obligatorio`);
         }
     }
 
+    //DNI numérico
+    if (datosPaciente.dni && isNaN(Number(datosPaciente.dni))) {
+        throw new Error("DNI debe ser un número válido");
+    }
+
+    //Fecha de nacimiento válida
+    if (datosPaciente.fechaNacimiento) {
+        const fecha = new Date(datosPaciente.fechaNacimiento);
+        if (isNaN(fecha.getTime()) || fecha > new Date()) {
+            throw new Error("Fecha de nacimiento inválida");
+        }
+    }
+
+    //Email válido
+    if (datosPaciente.email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(datosPaciente.email)) {
+            throw new Error("Email inválido");
+        }
+    }
+
+    //Teléfono válido
+    if (datosPaciente.telefono) {
+        const telRegex = /^[0-9\s\-()+]+$/;
+        if (!telRegex.test(datosPaciente.telefono)) {
+            throw new Error("Teléfono inválido");
+        }
+    }
+
+    //Fecha de alta posterior a nacimiento
+    if (datosPaciente.fechaAlta && datosPaciente.fechaNacimiento) {
+        const nacimiento = new Date(datosPaciente.fechaNacimiento);
+        const alta = new Date(datosPaciente.fechaAlta);
+        if (alta < nacimiento) {
+            throw new Error("La fecha de alta no puede ser anterior a la fecha de nacimiento");
+        }
+    }
 }

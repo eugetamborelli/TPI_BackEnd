@@ -7,12 +7,13 @@
     "fechaNacimiento": "1985-04-20",
     "telefono": "1123456789",
     "email": "juan.perez@example.com",
-    "direccion": "Calle de los Patos 456, Buenos Aires",
+    "direccion": "Patos 568, Buenos Aires",
     "obraSocial": "OSDE",
     "fechaAlta": "2023-01-15",
     "historiaClinicaId": 1,
     "createdAt": "2025-09-18T12:00:00.000Z",
-    "updatedAt": "2025-09-18T12:00:00.000Z"
+    "updatedAt": "2025-09-21T20:15:38.036Z",
+    "_method": "PATCH"
   },
   {
     "id": 2,
