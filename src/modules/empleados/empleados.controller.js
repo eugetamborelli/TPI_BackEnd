@@ -1,4 +1,3 @@
-// src/modules/empleados/empleados.controller.js
 import EmpleadosModel from "./empleados.model.js";
 
 const model = new EmpleadosModel();

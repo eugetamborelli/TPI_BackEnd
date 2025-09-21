@@ -1,5 +1,3 @@
-// src/modules/empleados/empleados.model.js
-// src/modules/empleados/empleados.model.js
 import { readEmpleadosFile, writeEmpleadosFile, getNextId } from "./empleados.utils.js";
 
 class EmpleadosModel {
@@ -15,17 +13,14 @@ class EmpleadosModel {
   create(empleado) {
     const empleados = this.#all();
 
-    // 1) ID autoincremental si no viene
     const id = empleado.id != null ? Number(empleado.id) : getNextId(empleados);
     if (!Number.isFinite(id)) return null;
 
-    // 2) Unicidad de id y dni
     const dni = String(empleado.dni ?? "");
     const idYaExiste = empleados.some((e) => e.id === id);
     const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
     if (idYaExiste || dniYaExiste) return null;
 
-    // 3) Timestamps y creación
     const now = new Date().toISOString();
     const nuevo = {
       id,
@@ -50,7 +45,6 @@ class EmpleadosModel {
 
     const { id: _ignoreId, createdAt: _ignoreCreatedAt, ...rest } = patch;
 
-    // si cambia DNI, validar unicidad
     if (rest.dni != null) {
       const nuevoDni = String(rest.dni);
       const existeOtro = empleados.some((e, i) => i !== index && String(e.dni) === nuevoDni);
