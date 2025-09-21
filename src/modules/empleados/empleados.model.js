@@ -71,6 +71,9 @@ class EmpleadosModel {
   filterByArea(area) {
     return this.#all().filter((e) => (e.area || "").toLowerCase() === area.toLowerCase());
   }
+  getByDni(dni) {
+    return this.#all().find((e) => String(e.dni) === String(dni));
+  }
 }
 
 export default EmpleadosModel;       

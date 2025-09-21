@@ -47,13 +47,28 @@ class EmpleadosController {
 
   editEmpleado = (req, res) => {
     try {
-      const emp = model.update(req.params.id, req.body);
-      if (!emp) return res.status(404).json({ error: "Empleado no encontrado o DNI en uso" });
+      const { id } = req.params;
+      let empleado;
+
+      if (!isNaN(id)) {
+        empleado = model.getById(Number(id));
+        if (!empleado) {
+          empleado = model.getByDni(id);
+        }
+      } else {
+        empleado = model.getByDni(id);
+      }
+
+      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
+
+      const emp = model.update(empleado.id, req.body);
+      if (!emp) return res.status(400).json({ error: "DNI en uso" });
       res.json(emp);
     } catch (err) {
       res.status(400).json({ error: "Error al actualizar empleado" });
     }
   };
+
 
   removeEmpleado = (req, res) => {
     try {
@@ -81,6 +96,17 @@ class EmpleadosController {
       res.json(model.filterByArea(area));
     } catch (err) {
       res.status(500).json({ error: "Error al filtrar por área" });
+    }
+  };
+
+  getEmpleadoByDni = (req, res) => {
+    try {
+      const { dni } = req.params;
+      const empleado = model.getByDni(dni);
+      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
+      res.json(empleado);
+    } catch (err) {
+      res.status(500).json({ error: "Error al obtener empleado" });
     }
   };
 }

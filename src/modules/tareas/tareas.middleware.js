@@ -30,6 +30,26 @@ export const validarCamposObligatorios = (req, res, next) => {
     next();
 };
 
+export const validarCamposOpcionales = (req, res, next) => {
+    const { titulo, descripcion, estado, prioridad } = req.body;
+
+    if (!titulo && !descripcion && !estado && !prioridad) {
+        return res.status(400).json({
+            error: "Debe proporcionar al menos un campo para actualizar: titulo, descripcion, estado, prioridad"
+        });
+    }
+
+    if (titulo !== undefined && (!titulo || titulo.trim() === "")) {
+        return res.status(400).json({ error: "El título no puede estar vacío" });
+    }
+    if (descripcion !== undefined && (!descripcion || descripcion.trim() === "")) {
+        return res.status(400).json({ error: "La descripción no puede estar vacía" });
+    }
+
+    next();
+};
+
+
 export const validarEstado = (req, res, next) => {
     const { estado } = req.body;
     if (estado && !ESTADOS_VALIDOS.includes(estado.toLowerCase())) {

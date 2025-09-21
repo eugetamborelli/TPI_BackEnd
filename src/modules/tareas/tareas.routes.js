@@ -4,6 +4,7 @@ import {
     validarCuerpoNoVacio,
     validarId,
     validarCamposObligatorios,
+    validarCamposOpcionales,
     validarEstado,
     validarPrioridad
 } from "./tareas.middleware.js";
@@ -25,9 +26,10 @@ router.post("/",
     validarPrioridad,
     tareasController.addTarea
 );
-router.put("/:id",
+router.patch("/:id",
     validarId,
     validarCuerpoNoVacio,
+    validarCamposOpcionales,
     validarEstado,
     validarPrioridad,
     tareasController.editTarea
