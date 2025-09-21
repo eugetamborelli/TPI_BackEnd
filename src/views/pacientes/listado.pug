@@ -1,0 +1,57 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Pacientes
+        br
+        ul
+            li
+                a(href="/pacientes/listado") Listado de Pacientes
+            li
+                a(href="/pacientes/nuevo-paciente") Alta de pacientes
+            li
+                a(href="/pacientes") Volver al Menú de Gestión de Pacientes
+        br
+
+        h3 Listado de Pacientes
+
+        //- Formulario de búsqueda por DNI
+        form(method="GET", action="/pacientes/listado")
+            label(for="dni") Buscar paciente por DNI:
+            input(type="text", name="dni", id="dni", value=dniBusqueda)
+            button(type="submit") Buscar
+
+        hr
+
+        table(border="1" cellpadding="5" cellspacing="0")
+            thead
+                tr
+                    th Nombre
+                    th Apellido
+                    th DNI
+                    th Fecha de Nacimiento
+                    th Teléfono
+                    th Email
+                    th Dirección
+                    th Obra Social
+                    th Fecha de Alta
+                    th Acciones
+                tbody
+                    each paciente in pacientes
+                        tr
+                            td #{paciente.nombre}
+                            td #{paciente.apellido}
+                            td #{paciente.dni}
+                            td #{paciente.fechaNacimiento}
+                            td #{paciente.telefono}
+                            td #{paciente.email}
+                            td #{paciente.direccion}
+                            td #{paciente.obraSocial}
+                            td #{paciente.fechaAlta}
+                            td
+                                a(href=`/pacientes/editar/${paciente.dni}`) 
+                                    button Modificar
+                                form(action=`/pacientes/${paciente.dni}?_method=DELETE`, method="POST", style="display:inline")
+                                    button(type="submit") Eliminar

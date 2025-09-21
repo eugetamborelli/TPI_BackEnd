@@ -1,0 +1,62 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Pacientes
+        br
+        ul
+            li
+                a(href="/pacientes/listado") Listado de Pacientes
+            li
+                a(href="/pacientes/nuevo-paciente") Alta de pacientes
+            li
+                a(href="/pacientes") Volver al Menú de Gestión de Pacientes
+        br
+
+        h3 Modificación de datos del paciente
+
+        //Render del error si lo lanza el controller
+        if error
+            p(style="color:red")= error
+
+        form(action=`/pacientes/editar/${paciente.dni}?_method=PATCH`, method="POST")
+            div
+                label(for="nombre") Nombre:
+                input(type="text" name="nombre" required value=paciente.nombre)
+
+            div
+                label(for="apellido") Apellido:
+                input(type="text" name="apellido" required value=paciente.apellido)
+
+            div
+                label(for="dni") DNI:
+                input(type="text" name="dni" value=paciente.dni readonly)
+
+            div
+                label(for="fechaNacimiento") Fecha de Nacimiento:
+                input(type="date" name="fechaNacimiento" required value=paciente.fechaNacimiento)
+
+            div
+                label(for="telefono") Teléfono:
+                input(type="text" name="telefono" required value=paciente.telefono)
+
+            div
+                label(for="direccion") Dirección:
+                input(type="text" name="direccion" required value=paciente.direccion)
+
+            div
+                label(for="email") Email:
+                input(type="email" name="email" value=paciente.email)
+
+            div
+                label(for="obraSocial") Obra Social:
+                input(type="text" name="obraSocial" required value=paciente.obraSocial)
+
+            div
+                label(for="fechaAlta") Fecha de Alta:
+                input(type="date" name="fechaAlta" value=paciente.fechaAlta readonly)
+
+            br
+            button(type="submit") Actualizar Paciente

@@ -1,0 +1,33 @@
+[
+  {
+    "id": 1,
+    "nombre": "Juan",
+    "apellido": "Pérez",
+    "dni": 12345678,
+    "fechaNacimiento": "1985-04-20",
+    "telefono": "1123456789",
+    "email": "juan.perez@example.com",
+    "direccion": "Patos 568, Buenos Aires",
+    "obraSocial": "OSDE",
+    "fechaAlta": "2023-01-15",
+    "historiaClinicaId": 1,
+    "createdAt": "2025-09-18T12:00:00.000Z",
+    "updatedAt": "2025-09-21T20:15:38.036Z",
+    "_method": "PATCH"
+  },
+  {
+    "id": 2,
+    "nombre": "María",
+    "apellido": "Gómez",
+    "dni": 87654321,
+    "fechaNacimiento": "1990-07-10",
+    "telefono": "1198765432",
+    "email": "maria.gomez@example.com",
+    "direccion": "Av. Siempre Viva 123, Buenos Aires",
+    "obraSocial": "Swiss Medical",
+    "fechaAlta": "2023-02-20",
+    "historiaClinicaId": 2,
+    "createdAt": "2025-09-18T12:05:00.000Z",
+    "updatedAt": "2025-09-18T12:05:00.000Z"
+  }
+]
