@@ -1,64 +1,114 @@
-import { writeTareasFile, readTareasFile } from "./tareas.utils.js"
+import { readJsonFile, writeJsonFile } from "../../utils/file.utils.js";
+import { isDateInRange, ESTADOS_VALIDOS, PRIORIDADES_VALIDAS } from "./tareas.utils.js";
 
-export const getAllTareas = () => {
-    return readTareasFile();
-};
+class TareasModel {
+    constructor() {
+        this.fileName = "tareas";
+    }
 
-export const getTareaById = (id) => {
-    const tareas = readTareasFile();
-    return tareas.find((t) => t.id === Number(id));
-};
+    leerArchivo = () => readJsonFile(this.fileName);
+    escribirArchivo = (datos) => writeJsonFile(this.fileName, datos);
 
-export const createTarea = (tareaData) => {
-    const tareas = readTareasFile();
+    validarTarea = (datos, esActualizacion = false) => {
+        if (!esActualizacion) {
+            const camposObligatorios = ['titulo', 'descripcion', 'estado', 'prioridad'];
+            const faltantes = camposObligatorios.filter(campo => !datos[campo]);
+            if (faltantes.length > 0) {
+                throw new Error(`Campos obligatorios faltantes: ${faltantes.join(', ')}`);
+            }
+        }
 
-    const newId = tareas.length > 0 ? Math.max(...tareas.map(t => t.id)) + 1 : 1;
+        if (datos.estado && !ESTADOS_VALIDOS.includes(datos.estado.toLowerCase())) {
+            throw new Error(`Estado inválido. Valores: ${ESTADOS_VALIDOS.join(', ')}`);
+        }
 
-    const newTarea = {
-        id: newId,
-        ...tareaData,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        if (datos.prioridad && !PRIORIDADES_VALIDAS.includes(datos.prioridad.toLowerCase())) {
+            throw new Error(`Prioridad inválida. Valores: ${PRIORIDADES_VALIDAS.join(', ')}`);
+        }
+
+        if (datos.fechaInicio && datos.fechaFin && new Date(datos.fechaInicio) > new Date(datos.fechaFin)) {
+            throw new Error("La fecha de inicio no puede ser posterior a la fecha de fin");
+        }
     };
 
-    tareas.push(newTarea);
+    obtenerTodas = () => this.leerArchivo();
 
-    if (writeTareasFile(tareas)) {
-        return newTarea;
-    } else {
-        throw new Error('Error al guardar la tarea');
-    }
-};
+    obtenerPorId = (id) => this.leerArchivo().find(t => t.id === Number(id));
 
-export const updateTarea = (id, tareaData) => {
-    const tareas = readTareasFile();
-    const index = tareas.findIndex((t) => t.id === Number(id));
+    crear = (datos) => {
+        this.validarTarea(datos, false);
 
-    if (index === -1) return null;
+        const tareas = this.leerArchivo();
 
-    tareas[index] = {
-        ...tareas[index],
-        ...tareaData,
-        updatedAt: new Date().toISOString(),
-        id: Number(id)
+        const idNuevo = tareas.length > 0
+            ? tareas.reduce((maxId, t) => t.id > maxId ? t.id : maxId, 0) + 1
+            : 1;
+
+        const nuevaTarea = {
+            id: idNuevo,
+            titulo: datos.titulo.trim(),
+            descripcion: datos.descripcion.trim(),
+            estado: datos.estado.toLowerCase(),
+            prioridad: datos.prioridad.toLowerCase(),
+            empleadoId: datos.empleadoId ? Number(datos.empleadoId) : undefined,
+            pacienteId: datos.pacienteId ? Number(datos.pacienteId) : undefined,
+            fechaInicio: datos.fechaInicio,
+            fechaFin: datos.fechaFin,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+        };
+
+        tareas.push(nuevaTarea);
+        this.escribirArchivo(tareas);
+        return nuevaTarea;
     };
 
-    if (writeTareasFile(tareas)) {
-        return tareas[index];
-    } else {
-        throw new Error('Error al actualizar la tarea');
-    }
-};
+    actualizar = (id, datos) => {
+        this.validarTarea(datos, true);
 
-export const deleteTarea = (id) => {
-    let tareas = readTareasFile();
-    const initialLength = tareas.length;
+        const tareas = this.leerArchivo();
+        const indice = tareas.findIndex(t => t.id === Number(id));
+        if (indice === -1) return null;
 
-    tareas = tareas.filter((t) => t.id !== Number(id));
+        const tareaActualizada = {
+            ...tareas[indice],
+            ...datos,
+            titulo: datos.titulo ? datos.titulo.trim() : tareas[indice].titulo,
+            descripcion: datos.descripcion ? datos.descripcion.trim() : tareas[indice].descripcion,
+            estado: datos.estado ? datos.estado.toLowerCase() : tareas[indice].estado,
+            prioridad: datos.prioridad ? datos.prioridad.toLowerCase() : tareas[indice].prioridad,
+            empleadoId: datos.empleadoId !== undefined ? Number(datos.empleadoId) : tareas[indice].empleadoId,
+            pacienteId: datos.pacienteId !== undefined ? Number(datos.pacienteId) : tareas[indice].pacienteId,
+            updatedAt: new Date().toISOString()
+        };
 
-    if (tareas.length === initialLength) {
-        return false;
-    }
+        tareas[indice] = tareaActualizada;
+        this.escribirArchivo(tareas);
+        return tareaActualizada;
+    };
 
-    return writeTareasFile(tareas);
-};
+    eliminar = (id) => {
+        const tareas = this.leerArchivo();
+        const tareasFiltradas = tareas.filter(t => t.id !== Number(id));
+
+        if (tareas.length === tareasFiltradas.length) return false;
+
+        this.escribirArchivo(tareasFiltradas);
+        return true;
+    };
+
+    filtrarPorEstado = (estado) => this.leerArchivo().filter(t => t.estado === estado.toLowerCase());
+    filtrarPorPrioridad = (prioridad) => this.leerArchivo().filter(t => t.prioridad === prioridad.toLowerCase());
+    filtrarPorEmpleado = (empleadoId) => this.leerArchivo().filter(t => t.empleadoId === Number(empleadoId));
+    filtrarPorPaciente = (pacienteId) => this.leerArchivo().filter(t => t.pacienteId === Number(pacienteId));
+    filtrarPorFecha = (inicio, fin, tipo = 'inicio') => {
+        const tareas = this.leerArchivo();
+        if (!inicio && !fin) return tareas;
+        return tareas.filter(t => {
+            const fecha = tipo === 'creacion' ? t.createdAt : tipo === 'finalizacion' ? t.fechaFin : t.fechaInicio;
+            return isDateInRange(fecha, inicio, fin);
+        });
+    };
+}
+
+export default TareasModel;
