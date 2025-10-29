@@ -1,0 +1,47 @@
+doctype html
+html
+  head
+    title Clínica Médica - Salud Integral
+  body
+    h1 Clínica Médica - Salud Integral
+    h2 Gestión de Insumos
+    br
+    ul
+      li
+        a(href="/insumos/listado") Listado de Insumos
+      li
+        a(href="/insumos/nuevo-insumo") Alta de insumos
+      li
+        a(href="/insumos") Volver al Menú de Gestión de Insumos
+    br
+
+    h3 Modificación de datos del insumo
+
+    if error
+      p(style="color:red")= error
+
+    form(action=`/insumos/editar/${insumo.id}?_method=PATCH`, method="POST")
+      div
+        label(for="nombre") Nombre:
+        input(type="text" name="nombre" required value=insumo.nombre)
+      div
+        label(for="categoria") Categoría:
+        input(type="text" name="categoria" required value=insumo.categoria)
+      div
+        label(for="proveedor") Proveedor:
+        input(type="text" name="proveedor" value=insumo.proveedor)
+      div
+        label(for="stock") Stock:
+        input(type="number" name="stock" min="0" required value=insumo.stock)
+      div
+        label(for="unidad") Unidad:
+        input(type="text" name="unidad" value=insumo.unidad)
+      div
+        label(for="precio") Precio:
+        input(type="number" step="0.01" name="precio" value=insumo.precio)
+      div
+        label(for="fechaAlta") Fecha de Alta:
+        input(type="date" name="fechaAlta" value=insumo.fechaAlta)
+
+      br
+      button(type="submit") Actualizar Insumo

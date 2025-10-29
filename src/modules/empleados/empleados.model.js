@@ -11,32 +11,40 @@ class EmpleadosModel {
   }
 
   create(empleado) {
-    const empleados = this.#all();
+  const empleados = this.#all();
 
-    const id = empleado.id != null ? Number(empleado.id) : getNextId(empleados);
-    if (!Number.isFinite(id)) return null;
+  const id = empleado.id != null ? Number(empleado.id) : getNextId(empleados);
+  if (!Number.isFinite(id)) return null;
 
-    const dni = String(empleado.dni ?? "");
-    const idYaExiste = empleados.some((e) => e.id === id);
-    const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
-    if (idYaExiste || dniYaExiste) return null;
+  const dni = String(empleado.dni ?? "");
+  const idYaExiste = empleados.some((e) => e.id === id);
+  const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
+  if (idYaExiste || dniYaExiste) return null;
 
-    const now = new Date().toISOString();
-    const nuevo = {
-      id,
-      nombre: empleado.nombre,
-      apellido: empleado.apellido,
-      dni,
-      rol: empleado.rol,
-      area: empleado.area,
-      createdAt: now,
-      updatedAt: now,
-    };
+  const now = new Date().toISOString();
+  const nuevo = {
+    id,
+    nombre: empleado.nombre,
+    apellido: empleado.apellido,
+    dni,
+    rol: empleado.rol,
+    area: empleado.area,
 
-    empleados.push(nuevo);
-    this.#save(empleados);
-    return nuevo;
-  }
+    // NUEVOS CAMPOS (opcionales)
+    telefono: empleado.telefono ?? "",
+    email: empleado.email ?? "",
+    fechaAlta: empleado.fechaAlta ?? "",
+    activo: !!empleado.activo,
+
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  empleados.push(nuevo);
+  this.#save(empleados);
+  return nuevo;
+}
+
 
   update(id, patch) {
     const empleados = this.#all();

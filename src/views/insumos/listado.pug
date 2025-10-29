@@ -1,0 +1,58 @@
+doctype html
+html
+  head
+    title Clínica Médica - Salud Integral
+  body
+    h1 Clínica Médica - Salud Integral
+    h2 Gestión de Insumos
+    br
+    ul
+      li
+        a(href="/insumos/listado") Listado de Insumos
+      li
+        a(href="/insumos/nuevo-insumo") Alta de insumos
+      li
+        a(href="/insumos") Volver al Menú de Gestión de Insumos
+    br
+
+    h3 Listado de Insumos
+
+    //- Filtros (opcionales) por categoría y proveedor
+    form(method="GET", action="/insumos/listado")
+      label(for="categoria") Filtrar por Categoría:
+      input(type="text", name="categoria", id="categoria", value=categoriaBusqueda)
+      button(type="submit") Filtrar
+
+    form(method="GET", action="/insumos/listado" style="margin-top:10px")
+      label(for="proveedor") Filtrar por Proveedor:
+      input(type="text", name="proveedor", id="proveedor", value=proveedorBusqueda)
+      button(type="submit") Filtrar
+
+    hr
+
+    table(border="1" cellpadding="5" cellspacing="0")
+      thead
+        tr
+          th Nombre
+          th Categoría
+          th Proveedor
+          th Stock
+          th Unidad
+          th Precio
+          th Fecha de Alta
+          th Acciones
+      tbody
+        each ins in insumos
+          tr
+            td #{ins.nombre}
+            td #{ins.categoria}
+            td #{ins.proveedor}
+            td #{ins.stock}
+            td #{ins.unidad}
+            td #{ins.precio}
+            td #{ins.fechaAlta}
+            td
+              a(href=`/insumos/editar/${ins.id}`)
+                button Modificar
+              form(action=`/insumos/${ins.id}?_method=DELETE`, method="POST", style="display:inline")
+                button(type="submit") Eliminar
