@@ -17,13 +17,13 @@
     "nombre": "Alcohol en gel 500ml",
     "categoria": "limpieza",
     "unidad": "un",
-    "stock": 20,
+    "stock": 55,
     "puntoReposicion": 5,
     "proveedor": "HigienePlus",
     "codigo": "ALGEL-500",
     "costoUnitario": 2500,
     "createdAt": "2025-09-19T19:30:19.158Z",
-    "updatedAt": "2025-09-19T19:30:19.158Z"
+    "updatedAt": "2025-09-19T21:50:15.603Z"
   },
   {
     "id": 3,
