@@ -74,19 +74,5 @@
     "empleadoId": 101,
     "pacienteId": 202,
     "observaciones": "Paciente con fiebre, reagendar para la próxima semana"
-  },
-  {
-    "id": 1757906491315,
-    "area": "gestion_de_turnos",
-    "titulo": "Cancelación de turno",
-    "descripcion": "Cancelar turno del paciente por enfermedad",
-    "estado": "pendiente",
-    "fechaInicio": "2025-09-18",
-    "prioridad": "alta",
-    "empleadoId": 101,
-    "pacienteId": 202,
-    "observaciones": "Paciente con fiebre, reagendar para la próxima semana",
-    "createdAt": "2025-09-19T15:16:44.276Z",
-    "updatedAt": "2025-09-19T15:16:44.277Z"
   }
 ]

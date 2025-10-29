@@ -1,29 +1,39 @@
 import { Router } from "express";
+import tareasController from "./tareas.controller.js";
 import {
-    getTareas,
-    getTarea,
-    addTarea,
-    editTarea,
-    removeTarea,
-    getTareasByEstado,
-    getTareasByPrioridad,
-    getTareasByEmpleado,
-    getTareasByPaciente,
-    getTareasByFecha,
-} from "./tareas.controller.js";
+    validarCuerpoNoVacio,
+    validarId,
+    validarCamposObligatorios,
+    validarCamposOpcionales,
+    validarEstado,
+    validarPrioridad
+} from "./tareas.middleware.js";
 
 const router = Router();
 
-router.get("/fecha", getTareasByFecha);
-router.get("/estado/:estado", getTareasByEstado);
-router.get("/prioridad/:prioridad", getTareasByPrioridad);
-router.get("/empleado/:empleadoId", getTareasByEmpleado);
-router.get("/paciente/:pacienteId", getTareasByPaciente);
+router.get("/fecha", tareasController.getTareasByFecha);
+router.get("/estado/:estado", tareasController.getTareasByEstado);
+router.get("/prioridad/:prioridad", tareasController.getTareasByPrioridad);
+router.get("/empleado/:empleadoId", tareasController.getTareasByEmpleado);
+router.get("/paciente/:pacienteId", tareasController.getTareasByPaciente);
 
-router.get("/", getTareas);
-router.get("/:id", getTarea);
-router.post("/", addTarea);
-router.put("/:id", editTarea);
-router.delete("/:id", removeTarea);
+router.get("/", tareasController.getTareas);
+router.get("/:id", validarId, tareasController.getTarea);
+router.post("/",
+    validarCuerpoNoVacio,
+    validarCamposObligatorios,
+    validarEstado,
+    validarPrioridad,
+    tareasController.addTarea
+);
+router.patch("/:id",
+    validarId,
+    validarCuerpoNoVacio,
+    validarCamposOpcionales,
+    validarEstado,
+    validarPrioridad,
+    tareasController.editTarea
+);
+router.delete("/:id", validarId, tareasController.removeTarea);
 
 export default router;
