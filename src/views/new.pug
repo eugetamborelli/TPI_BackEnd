@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    title Agregar Médico
+  body
+    h1 Agregar nuevo médico
+
+    form(action="/medicos" method="POST")
+      label(for="nombre") Nombre:
+      input(type="text" name="nombre" required)
+      br
+
+      label(for="especialidad") Especialidad:
+      input(type="text" name="especialidad" required)
+      br
+
+      label(for="email") Email:
+      input(type="email" name="email")
+      br
+
+      label(for="telefono") Teléfono:
+      input(type="text" name="telefono")
+      br
+
+      button(type="submit") Guardar
+      a(href="/medicos") Volver

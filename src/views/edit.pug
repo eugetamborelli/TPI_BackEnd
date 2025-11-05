@@ -1,0 +1,26 @@
+doctype html
+html
+  head
+    title Editar Médico
+  body
+    h1 Editar médico
+
+    form(action=`/medicos/${medico._id}?_method=PUT` method="POST")
+      label(for="nombre") Nombre:
+      input(type="text" name="nombre" value=medico.nombre required)
+      br
+
+      label(for="especialidad") Especialidad:
+      input(type="text" name="especialidad" value=medico.especialidad required)
+      br
+
+      label(for="email") Email:
+      input(type="email" name="email" value=medico.email)
+      br
+
+      label(for="telefono") Teléfono:
+      input(type="text" name="telefono" value=medico.telefono)
+      br
+
+      button(type="submit") Actualizar
+      a(href="/medicos") Cancelar
