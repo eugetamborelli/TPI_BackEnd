@@ -1,114 +1,85 @@
-import { readJsonFile, writeJsonFile } from "../../utils/file.utils.js";
+import BaseModel from "../../common/base/base.model.js";
+import ValidationService from "../../common/services/validation.service.js";
 import { isDateInRange, ESTADOS_VALIDOS, PRIORIDADES_VALIDAS } from "./tareas.utils.js";
 
-class TareasModel {
+class TareasModel extends BaseModel {
     constructor() {
-        this.fileName = "tareas";
+        super("tareas");
     }
 
-    leerArchivo = () => readJsonFile(this.fileName);
-    escribirArchivo = (datos) => writeJsonFile(this.fileName, datos);
+    validateData(datos, isUpdate = false) {
+        const requiredFields = ['titulo', 'descripcion', 'estado', 'prioridad'];
+        ValidationService.validateRequiredFields(datos, requiredFields, isUpdate);
 
-    validarTarea = (datos, esActualizacion = false) => {
-        if (!esActualizacion) {
-            const camposObligatorios = ['titulo', 'descripcion', 'estado', 'prioridad'];
-            const faltantes = camposObligatorios.filter(campo => !datos[campo]);
-            if (faltantes.length > 0) {
-                throw new Error(`Campos obligatorios faltantes: ${faltantes.join(', ')}`);
-            }
-        }
+        ValidationService.validateEnum('estado', datos.estado, ESTADOS_VALIDOS);
+        ValidationService.validateEnum('prioridad', datos.prioridad, PRIORIDADES_VALIDAS);
+        ValidationService.validateDateRange(datos.fechaInicio, datos.fechaFin);
+        ValidationService.validateDate(datos.fechaInicio, true);
+        ValidationService.validateDate(datos.fechaFin, true);
+    }
 
-        if (datos.estado && !ESTADOS_VALIDOS.includes(datos.estado.toLowerCase())) {
-            throw new Error(`Estado inválido. Valores: ${ESTADOS_VALIDOS.join(', ')}`);
-        }
-
-        if (datos.prioridad && !PRIORIDADES_VALIDAS.includes(datos.prioridad.toLowerCase())) {
-            throw new Error(`Prioridad inválida. Valores: ${PRIORIDADES_VALIDAS.join(', ')}`);
-        }
-
-        if (datos.fechaInicio && datos.fechaFin && new Date(datos.fechaInicio) > new Date(datos.fechaFin)) {
-            throw new Error("La fecha de inicio no puede ser posterior a la fecha de fin");
-        }
-    };
-
-    obtenerTodas = () => this.leerArchivo();
-
-    obtenerPorId = (id) => this.leerArchivo().find(t => t.id === Number(id));
-
-    crear = (datos) => {
-        this.validarTarea(datos, false);
-
-        const tareas = this.leerArchivo();
-
-        const idNuevo = tareas.length > 0
-            ? tareas.reduce((maxId, t) => t.id > maxId ? t.id : maxId, 0) + 1
-            : 1;
-
-        const nuevaTarea = {
-            id: idNuevo,
-            titulo: datos.titulo.trim(),
-            descripcion: datos.descripcion.trim(),
-            estado: datos.estado.toLowerCase(),
-            prioridad: datos.prioridad.toLowerCase(),
+    create(datos) {
+        const datosNormalizados = {
+            titulo: datos.titulo?.trim(),
+            descripcion: datos.descripcion?.trim(),
+            estado: datos.estado?.toLowerCase(),
+            prioridad: datos.prioridad?.toLowerCase(),
             empleadoId: datos.empleadoId ? Number(datos.empleadoId) : undefined,
             pacienteId: datos.pacienteId ? Number(datos.pacienteId) : undefined,
             fechaInicio: datos.fechaInicio,
-            fechaFin: datos.fechaFin,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
+            fechaFin: datos.fechaFin
         };
 
-        tareas.push(nuevaTarea);
-        this.escribirArchivo(tareas);
-        return nuevaTarea;
-    };
+        return super.create(datosNormalizados);
+    }
 
-    actualizar = (id, datos) => {
-        this.validarTarea(datos, true);
+    update(id, datos) {
+        const datosNormalizados = {};
+        
+        if (datos.titulo !== undefined) datosNormalizados.titulo = datos.titulo.trim();
+        if (datos.descripcion !== undefined) datosNormalizados.descripcion = datos.descripcion.trim();
+        if (datos.estado !== undefined) datosNormalizados.estado = datos.estado.toLowerCase();
+        if (datos.prioridad !== undefined) datosNormalizados.prioridad = datos.prioridad.toLowerCase();
+        if (datos.empleadoId !== undefined) datosNormalizados.empleadoId = Number(datos.empleadoId);
+        if (datos.pacienteId !== undefined) datosNormalizados.pacienteId = Number(datos.pacienteId);
+        if (datos.fechaInicio !== undefined) datosNormalizados.fechaInicio = datos.fechaInicio;
+        if (datos.fechaFin !== undefined) datosNormalizados.fechaFin = datos.fechaFin;
 
-        const tareas = this.leerArchivo();
-        const indice = tareas.findIndex(t => t.id === Number(id));
-        if (indice === -1) return null;
+        return super.update(id, datosNormalizados);
+    }
 
-        const tareaActualizada = {
-            ...tareas[indice],
-            ...datos,
-            titulo: datos.titulo ? datos.titulo.trim() : tareas[indice].titulo,
-            descripcion: datos.descripcion ? datos.descripcion.trim() : tareas[indice].descripcion,
-            estado: datos.estado ? datos.estado.toLowerCase() : tareas[indice].estado,
-            prioridad: datos.prioridad ? datos.prioridad.toLowerCase() : tareas[indice].prioridad,
-            empleadoId: datos.empleadoId !== undefined ? Number(datos.empleadoId) : tareas[indice].empleadoId,
-            pacienteId: datos.pacienteId !== undefined ? Number(datos.pacienteId) : tareas[indice].pacienteId,
-            updatedAt: new Date().toISOString()
-        };
+    filtrarPorEstado(estado) {
+        return this.filterBy('estado', estado.toLowerCase());
+    }
 
-        tareas[indice] = tareaActualizada;
-        this.escribirArchivo(tareas);
-        return tareaActualizada;
-    };
+    filtrarPorPrioridad(prioridad) {
+        return this.filterBy('prioridad', prioridad.toLowerCase());
+    }
 
-    eliminar = (id) => {
-        const tareas = this.leerArchivo();
-        const tareasFiltradas = tareas.filter(t => t.id !== Number(id));
+    filtrarPorEmpleado(empleadoId) {
+        return this.filterBy('empleadoId', Number(empleadoId));
+    }
 
-        if (tareas.length === tareasFiltradas.length) return false;
+    filtrarPorPaciente(pacienteId) {
+        return this.filterBy('pacienteId', Number(pacienteId));
+    }
 
-        this.escribirArchivo(tareasFiltradas);
-        return true;
-    };
-
-    filtrarPorEstado = (estado) => this.leerArchivo().filter(t => t.estado === estado.toLowerCase());
-    filtrarPorPrioridad = (prioridad) => this.leerArchivo().filter(t => t.prioridad === prioridad.toLowerCase());
-    filtrarPorEmpleado = (empleadoId) => this.leerArchivo().filter(t => t.empleadoId === Number(empleadoId));
-    filtrarPorPaciente = (pacienteId) => this.leerArchivo().filter(t => t.pacienteId === Number(pacienteId));
-    filtrarPorFecha = (inicio, fin, tipo = 'inicio') => {
-        const tareas = this.leerArchivo();
+    filtrarPorFecha(inicio, fin, tipo = 'inicio') {
+        const tareas = this.getAll();
         if (!inicio && !fin) return tareas;
+        
         return tareas.filter(t => {
-            const fecha = tipo === 'creacion' ? t.createdAt : tipo === 'finalizacion' ? t.fechaFin : t.fechaInicio;
+            const fecha = tipo === 'creacion' ? t.createdAt : 
+                         tipo === 'finalizacion' ? t.fechaFin : t.fechaInicio;
             return isDateInRange(fecha, inicio, fin);
         });
-    };
+    }
+
+    obtenerTodas() { return this.getAll(); }
+    obtenerPorId(id) { return this.getById(id); }
+    crear(datos) { return this.create(datos); }
+    actualizar(id, datos) { return this.update(id, datos); }
+    eliminar(id) { return this.delete(id); }
 }
 
 export default TareasModel;
