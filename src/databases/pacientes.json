@@ -13,7 +13,8 @@
     "historiaClinicaId": 1,
     "createdAt": "2025-09-18T12:00:00.000Z",
     "updatedAt": "2025-09-21T20:15:38.036Z",
-    "_method": "PATCH"
+    "_method": "PATCH",
+    "password": "$2b$10$6qzhJexnPF4V1RrQBUsJWumoWjaBjFGJLlz3UXUD7SyHyPFx7bgcO"
   },
   {
     "id": 2,
@@ -28,6 +29,30 @@
     "fechaAlta": "2023-02-20",
     "historiaClinicaId": 2,
     "createdAt": "2025-09-18T12:05:00.000Z",
+<<<<<<< HEAD
+    "updatedAt": "2025-09-18T12:05:00.000Z",
+    "password": "$2b$10$lcFgCB9xMJzGV4py9Rmq0.ELqwEnp8a9hlar0yNqdXEbXxh27I8z6"
+=======
     "updatedAt": "2025-09-18T12:05:00.000Z"
+>>>>>>> betaniagonzalez@refactortotal
+  },
+  {
+    "id": 3,
+    "nombre": "Ana",
+    "apellido": "Rodriguez",
+    "dni": "41123456",
+    "fechaNacimiento": "1992-03-15",
+    "telefono": "1145678901",
+    "email": "ana.rodriguez@email.com",
+    "direccion": "San Martin 456",
+    "obraSocial": "Galeno",
+    "fechaAlta": "2025-11-12",
+    "createdAt": "2025-11-12T20:37:33.186Z",
+<<<<<<< HEAD
+    "updatedAt": "2025-11-12T20:37:33.186Z",
+    "password": "$2b$10$MZjijfLfXh5YkfjJufYag.fltNT1OFWqc/WfjOc1pVyK5/KDoOrvy"
+=======
+    "updatedAt": "2025-11-12T20:37:33.186Z"
+>>>>>>> betaniagonzalez@refactortotal
   }
 ]

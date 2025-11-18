@@ -1,51 +1,68 @@
+import BaseController from "../../common/base/base.controller.js";
+import ResponseService from "../../common/services/response.service.js";
 import EmpleadosModel from "./empleados.model.js";
 
 const model = new EmpleadosModel();
 
-class EmpleadosController {
-  // CRUD
+class EmpleadosController extends BaseController {
+  constructor() {
+    super(model);
+  }
+<<<<<<< HEAD
+
   getEmpleados = (req, res) => {
     try {
-      res.json(model.getAll());
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleados" });
+      const empleados = model.getAll();
+      // No devolver password en las respuestas
+      const empleadosSinPassword = empleados.map(({ password, ...rest }) => rest);
+      ResponseService.success(res, empleadosSinPassword);
+    } catch (error) {
+      ResponseService.serverError(res, "Error al obtener empleados");
     }
   };
 
   getEmpleado = (req, res) => {
     try {
-      const emp = model.getById(req.params.id);
-      if (!emp) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json(emp);
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleado" });
+      const empleado = model.getById(req.params.id);
+      if (!empleado) {
+        return ResponseService.notFound(res, "Empleado no encontrado");
+      }
+      // No devolver password en la respuesta
+      const { password, ...empleadoSinPassword } = empleado;
+      ResponseService.success(res, empleadoSinPassword);
+    } catch (error) {
+      ResponseService.serverError(res, "Error al obtener empleado");
     }
   };
+  removeEmpleado = this.delete;
 
-  addEmpleado = (req, res) => {
+  addEmpleado = async (req, res) => {
     try {
-      const { id, nombre, apellido, dni, rol, area } = req.body;
-
-      // Validación de campos obligatorios
-      if (!nombre || !apellido || !dni || !rol || !area) {
-        return res
-          .status(400)
-          .json({ error: "Campos obligatorios: nombre, apellido, dni, rol, area" });
+      const newEmpleado = await model.create(req.body);
+      // No devolver password en la respuesta
+      const { password, ...empleadoSinPassword } = newEmpleado;
+      ResponseService.created(res, empleadoSinPassword);
+    } catch (error) {
+      if (error.message.includes("obligatorio") || 
+          error.message.includes("inválido") ||
+          error.message.includes("debe ser") ||
+          error.message.includes("DNI") ||
+          error.message.includes("contraseña")) {
+        ResponseService.badRequest(res, error.message);
+      } else {
+        ResponseService.serverError(res, "Error al crear empleado");
       }
-
-      const nuevo = model.create({ id, nombre, apellido, dni, rol, area });
-      if (!nuevo) {
-        // Conflicto por id o dni repetido
-        return res.status(409).json({ error: "ID o DNI ya existente" });
-      }
-
-      res.status(201).json(nuevo);
-    } catch (err) {
-      res.status(500).json({ error: "Error al crear empleado" });
     }
   };
+=======
 
-  editEmpleado = (req, res) => {
+  getEmpleados = this.getAll;
+  getEmpleado = this.getById;
+  addEmpleado = this.create;
+  removeEmpleado = this.delete;
+>>>>>>> betaniagonzalez@refactortotal
+
+  editEmpleado = async (req, res) => {
     try {
       const { id } = req.params;
       let empleado;
@@ -59,54 +76,84 @@ class EmpleadosController {
         empleado = model.getByDni(id);
       }
 
-      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
+      if (!empleado) {
+        return ResponseService.notFound(res, "Empleado no encontrado");
+      }
 
-      const emp = model.update(empleado.id, req.body);
-      if (!emp) return res.status(400).json({ error: "DNI en uso" });
-      res.json(emp);
+<<<<<<< HEAD
+      const updatedEmpleado = await model.update(empleado.id, req.body);
+=======
+      const updatedEmpleado = model.update(empleado.id, req.body);
+>>>>>>> betaniagonzalez@refactortotal
+      if (!updatedEmpleado) {
+        return ResponseService.conflict(res, "DNI en uso");
+      }
+      
+<<<<<<< HEAD
+      // No devolver password en la respuesta
+      const { password, ...empleadoSinPassword } = updatedEmpleado;
+      ResponseService.success(res, empleadoSinPassword);
     } catch (err) {
-      res.status(400).json({ error: "Error al actualizar empleado" });
+      if (err.message.includes("DNI") || 
+          err.message.includes("obligatorio") ||
+          err.message.includes("contraseña")) {
+=======
+      ResponseService.success(res, updatedEmpleado);
+    } catch (err) {
+      if (err.message.includes("DNI") || err.message.includes("obligatorio")) {
+>>>>>>> betaniagonzalez@refactortotal
+        ResponseService.badRequest(res, err.message);
+      } else {
+        ResponseService.serverError(res, "Error al actualizar empleado");
+      }
     }
   };
 
-
-  removeEmpleado = (req, res) => {
-    try {
-      const ok = model.remove(req.params.id);
-      if (!ok) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json({ message: "Empleado eliminado" });
-    } catch (err) {
-      res.status(500).json({ error: "Error al eliminar empleado" });
-    }
-  };
-
-  // Filtros
+<<<<<<< HEAD
   getEmpleadosByRol = (req, res) => {
     try {
       const { rol } = req.params;
-      res.json(model.filterByRol(rol));
-    } catch (err) {
-      res.status(500).json({ error: "Error al filtrar por rol" });
+      const empleados = model.filterByRol(rol);
+      // No devolver password en las respuestas
+      const empleadosSinPassword = empleados.map(({ password, ...rest }) => rest);
+      ResponseService.success(res, empleadosSinPassword);
+    } catch (error) {
+      ResponseService.serverError(res, "Error al filtrar empleados por rol");
     }
   };
 
   getEmpleadosByArea = (req, res) => {
     try {
       const { area } = req.params;
-      res.json(model.filterByArea(area));
-    } catch (err) {
-      res.status(500).json({ error: "Error al filtrar por área" });
+      const empleados = model.filterByArea(area);
+      // No devolver password en las respuestas
+      const empleadosSinPassword = empleados.map(({ password, ...rest }) => rest);
+      ResponseService.success(res, empleadosSinPassword);
+    } catch (error) {
+      ResponseService.serverError(res, "Error al filtrar empleados por área");
     }
   };
+=======
+  getEmpleadosByRol = this.createFilterHandler('rol', 'rol');
+  getEmpleadosByArea = this.createFilterHandler('area', 'area');
+>>>>>>> betaniagonzalez@refactortotal
 
   getEmpleadoByDni = (req, res) => {
     try {
       const { dni } = req.params;
       const empleado = model.getByDni(dni);
-      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json(empleado);
+      if (!empleado) {
+        return ResponseService.notFound(res, "Empleado no encontrado");
+      }
+<<<<<<< HEAD
+      // No devolver password en la respuesta
+      const { password, ...empleadoSinPassword } = empleado;
+      ResponseService.success(res, empleadoSinPassword);
+=======
+      ResponseService.success(res, empleado);
+>>>>>>> betaniagonzalez@refactortotal
     } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleado" });
+      ResponseService.serverError(res, "Error al obtener empleado");
     }
   };
 }

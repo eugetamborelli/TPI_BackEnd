@@ -74,5 +74,18 @@
     "empleadoId": 101,
     "pacienteId": 202,
     "observaciones": "Paciente con fiebre, reagendar para la próxima semana"
+  },
+  {
+    "id": 1757906491314,
+    "titulo": "Revisar expediente médico",
+    "descripcion": "Revisar expediente del paciente Juan Pérez",
+    "estado": "pendiente",
+    "prioridad": "alta",
+    "empleadoId": 1,
+    "pacienteId": 5,
+    "fechaInicio": "2025-11-13",
+    "fechaFin": "2025-11-15",
+    "createdAt": "2025-11-12T20:20:29.997Z",
+    "updatedAt": "2025-11-12T20:20:29.997Z"
   }
 ]
