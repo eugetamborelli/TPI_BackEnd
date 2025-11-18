@@ -8,6 +8,7 @@ class EmpleadosController extends BaseController {
   constructor() {
     super(model);
   }
+<<<<<<< HEAD
 
   getEmpleados = (req, res) => {
     try {
@@ -53,6 +54,13 @@ class EmpleadosController extends BaseController {
       }
     }
   };
+=======
+
+  getEmpleados = this.getAll;
+  getEmpleado = this.getById;
+  addEmpleado = this.create;
+  removeEmpleado = this.delete;
+>>>>>>> betaniagonzalez@refactortotal
 
   editEmpleado = async (req, res) => {
     try {
@@ -72,11 +80,16 @@ class EmpleadosController extends BaseController {
         return ResponseService.notFound(res, "Empleado no encontrado");
       }
 
+<<<<<<< HEAD
       const updatedEmpleado = await model.update(empleado.id, req.body);
+=======
+      const updatedEmpleado = model.update(empleado.id, req.body);
+>>>>>>> betaniagonzalez@refactortotal
       if (!updatedEmpleado) {
         return ResponseService.conflict(res, "DNI en uso");
       }
       
+<<<<<<< HEAD
       // No devolver password en la respuesta
       const { password, ...empleadoSinPassword } = updatedEmpleado;
       ResponseService.success(res, empleadoSinPassword);
@@ -84,6 +97,11 @@ class EmpleadosController extends BaseController {
       if (err.message.includes("DNI") || 
           err.message.includes("obligatorio") ||
           err.message.includes("contraseña")) {
+=======
+      ResponseService.success(res, updatedEmpleado);
+    } catch (err) {
+      if (err.message.includes("DNI") || err.message.includes("obligatorio")) {
+>>>>>>> betaniagonzalez@refactortotal
         ResponseService.badRequest(res, err.message);
       } else {
         ResponseService.serverError(res, "Error al actualizar empleado");
@@ -91,6 +109,7 @@ class EmpleadosController extends BaseController {
     }
   };
 
+<<<<<<< HEAD
   getEmpleadosByRol = (req, res) => {
     try {
       const { rol } = req.params;
@@ -114,6 +133,10 @@ class EmpleadosController extends BaseController {
       ResponseService.serverError(res, "Error al filtrar empleados por área");
     }
   };
+=======
+  getEmpleadosByRol = this.createFilterHandler('rol', 'rol');
+  getEmpleadosByArea = this.createFilterHandler('area', 'area');
+>>>>>>> betaniagonzalez@refactortotal
 
   getEmpleadoByDni = (req, res) => {
     try {
@@ -122,9 +145,13 @@ class EmpleadosController extends BaseController {
       if (!empleado) {
         return ResponseService.notFound(res, "Empleado no encontrado");
       }
+<<<<<<< HEAD
       // No devolver password en la respuesta
       const { password, ...empleadoSinPassword } = empleado;
       ResponseService.success(res, empleadoSinPassword);
+=======
+      ResponseService.success(res, empleado);
+>>>>>>> betaniagonzalez@refactortotal
     } catch (err) {
       ResponseService.serverError(res, "Error al obtener empleado");
     }

@@ -20,12 +20,16 @@ export const getPacientesListado = async(req, res) => {
         if (dni) {
             try {
                 const paciente = await pacienteModel.getPacienteByDni(dni);
+<<<<<<< HEAD
                 if (paciente) {
                     const { password, ...pacienteSinPassword } = paciente;
                     pacientes = [pacienteSinPassword];
                 } else {
                     pacientes = [];
                 }
+=======
+                pacientes = paciente ? [paciente] : [];
+>>>>>>> betaniagonzalez@refactortotal
             } catch (error) {
                 // Si no encuentra por DNI, mostrar lista vacía
                 pacientes = [];
@@ -79,10 +83,16 @@ export const updatePaciente = async (req, res) => {
         // En caso de error, necesitamos obtener el paciente original para el formulario
         try {
             const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
+<<<<<<< HEAD
             const { password, ...pacienteSinPassword } = paciente;
             res.status(400).render("pacientes/editarPaciente", { 
                 error: error.message, 
                 paciente: { ...pacienteSinPassword, ...req.body }
+=======
+            res.status(400).render("pacientes/editarPaciente", { 
+                error: error.message, 
+                paciente: { ...paciente, ...req.body }
+>>>>>>> betaniagonzalez@refactortotal
             });
         } catch (getError) {
             res.redirect("/pacientes/listado");
