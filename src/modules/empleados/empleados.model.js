@@ -1,79 +1,67 @@
-import { readEmpleadosFile, writeEmpleadosFile, getNextId } from "./empleados.utils.js";
+import BaseModel from "../../common/base/base.model.js";
+import ValidationService from "../../common/services/validation.service.js";
+import { normalizeDate, isDateInRange } from "./empleados.utils.js";
 
-class EmpleadosModel {
-  #all() { return readEmpleadosFile(); }
-  #save(data) { writeEmpleadosFile(data); }
+class EmpleadosModel extends BaseModel {
+  constructor() {
+    super("empleados");
+  }
 
-  getAll() { return this.#all(); }
+  validateData(empleado, isUpdate = false) {
+    const requiredFields = ['nombre', 'apellido', 'dni', 'rol', 'area'];
+    ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
 
-  getById(id) {
-    return this.#all().find((e) => e.id === Number(id));
+    ValidationService.validateDni(empleado.dni);
+
+    if (empleado.dni) {
+      const existing = this.getByDni(empleado.dni);
+      if (existing && (!isUpdate || existing.id !== empleado.id)) {
+        throw new Error("Ya existe un empleado con ese DNI");
+      }
+    }
   }
 
   create(empleado) {
-    const empleados = this.#all();
-
-    const id = empleado.id != null ? Number(empleado.id) : getNextId(empleados);
-    if (!Number.isFinite(id)) return null;
-
+    const empleados = this.getAll();
+    
     const dni = String(empleado.dni ?? "");
-    const idYaExiste = empleados.some((e) => e.id === id);
     const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
-    if (idYaExiste || dniYaExiste) return null;
+    if (dniYaExiste) {
+      throw new Error("DNI ya existente");
+    }
 
-    const now = new Date().toISOString();
-    const nuevo = {
-      id,
-      nombre: empleado.nombre,
-      apellido: empleado.apellido,
-      dni,
-      rol: empleado.rol,
-      area: empleado.area,
-      createdAt: now,
-      updatedAt: now,
-    };
-
-    empleados.push(nuevo);
-    this.#save(empleados);
-    return nuevo;
+    return super.create(empleado);
   }
 
   update(id, patch) {
-    const empleados = this.#all();
+    const empleados = this.getAll();
     const index = empleados.findIndex((e) => e.id === Number(id));
     if (index === -1) return null;
 
-    const { id: _ignoreId, createdAt: _ignoreCreatedAt, ...rest } = patch;
-
-    if (rest.dni != null) {
-      const nuevoDni = String(rest.dni);
+    if (patch.dni != null) {
+      const nuevoDni = String(patch.dni);
       const existeOtro = empleados.some((e, i) => i !== index && String(e.dni) === nuevoDni);
-      if (existeOtro) return null;
+      if (existeOtro) {
+        throw new Error("DNI ya existente");
+      }
     }
 
-    empleados[index] = { ...empleados[index], ...rest, updatedAt: new Date().toISOString() };
-    this.#save(empleados);
-    return empleados[index];
+    return super.update(id, patch);
   }
 
-  remove(id) {
-    const empleados = this.#all();
-    const after = empleados.filter((e) => e.id !== Number(id));
-    const borrado = after.length !== empleados.length;
-    this.#save(after);
-    return borrado;
-  }
-
-  // Filtros
   filterByRol(rol) {
-    return this.#all().filter((e) => (e.rol || "").toLowerCase() === rol.toLowerCase());
+    return this.filterBy('rol', rol);
   }
+
   filterByArea(area) {
-    return this.#all().filter((e) => (e.area || "").toLowerCase() === area.toLowerCase());
+    return this.filterBy('area', area);
   }
+
   getByDni(dni) {
-    return this.#all().find((e) => String(e.dni) === String(dni));
+    return this.findBy('dni', String(dni))[0] || null;
   }
+
+  remove(id) { return this.delete(id); }
 }
 
 export default EmpleadosModel;       
