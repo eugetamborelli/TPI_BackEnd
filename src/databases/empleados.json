@@ -6,7 +6,9 @@
     "dni": "32123456",
     "rol": "recepcionista",
     "area": "Administración de Turnos",
-    "updatedAt": "2025-09-15T22:57:25.109Z"
+    "updatedAt": "2025-09-15T22:57:25.109Z",
+    "email": "carla.mendez@saludintegral.com",
+    "password": "$2b$10$hRaxhUaRTMVhH.p44Z5a.uO70ddIUxBYGwUWpEfkPPJgzpJJT/d7O"
   },
   {
     "id": 102,
@@ -15,7 +17,9 @@
     "dni": "28999111",
     "rol": "médico",
     "area": "Atención Médica",
-    "updatedAt": "2025-09-15T23:00:24.787Z"
+    "updatedAt": "2025-09-15T23:00:24.787Z",
+    "email": "juan.perez@saludintegral.com",
+    "password": "$2b$10$7YKCoDl9cp7CDISuMvyRn.j40owzAWwvGKh/weuB9Fbav31wRkTsa"
   },
   {
     "id": 103,
@@ -24,7 +28,9 @@
     "dni": "30555123",
     "rol": "encargado de stock",
     "area": "Stock de Insumos",
-    "updatedAt": "2025-09-15T23:00:29.677Z"
+    "updatedAt": "2025-09-15T23:00:29.677Z",
+    "email": "mariana.sosa@saludintegral.com",
+    "password": "$2b$10$sngwqYoLT9xR.AKu/vnXpO8qkrKmrFPp1874InuewyYDZBNAorAgS"
   },
   {
     "id": 104,
@@ -33,7 +39,9 @@
     "dni": "27111222",
     "rol": "administrador",
     "area": "Facturación",
-    "updatedAt": "2025-09-15T23:00:33.426Z"
+    "updatedAt": "2025-09-15T23:00:33.426Z",
+    "email": "ricardo.ibarra@saludintegral.com",
+    "password": "$2b$10$sBO4c51JHu4AXWHAAAzb3O9Ty363Q9m9n.nNB5ts4H35bPgGIJNSG"
   },
   {
     "id": 105,
@@ -43,7 +51,9 @@
     "rol": "enfermera",
     "area": "Atención Médica",
     "createdAt": "2025-09-19T16:40:24.164Z",
-    "updatedAt": "2025-09-19T16:40:24.164Z"
+    "updatedAt": "2025-09-19T16:40:24.164Z",
+    "email": "lucia.fernandez@saludintegral.com",
+    "password": "$2b$10$ej6Q3l5s3Ss4PrrKKw3Hxe3IwgV7GPdQ2XtOpYtlydbxiSgP47SRS"
   },
   {
     "id": 106,
@@ -53,6 +63,8 @@
     "rol": "enfermera",
     "area": "Emergencias",
     "createdAt": "2025-11-12T20:27:12.495Z",
-    "updatedAt": "2025-11-12T20:27:12.495Z"
+    "updatedAt": "2025-11-12T20:27:12.495Z",
+    "email": "maria.gonzalez@saludintegral.com",
+    "password": "$2b$10$amYXPjFw.O9j2elgmoftuO061dek1533.CsjTLiSNA4z/uiWp6E3G"
   }
 ]
