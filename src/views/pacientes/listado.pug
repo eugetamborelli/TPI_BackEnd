@@ -38,20 +38,20 @@ html
                     th Obra Social
                     th Fecha de Alta
                     th Acciones
-                tbody
-                    each paciente in pacientes
-                        tr
-                            td #{paciente.nombre}
-                            td #{paciente.apellido}
-                            td #{paciente.dni}
-                            td #{paciente.fechaNacimiento}
-                            td #{paciente.telefono}
-                            td #{paciente.email}
-                            td #{paciente.direccion}
-                            td #{paciente.obraSocial}
-                            td #{paciente.fechaAlta}
-                            td
-                                a(href=`/pacientes/editar/${paciente.dni}`) 
-                                    button Modificar
-                                form(action=`/pacientes/${paciente.dni}?_method=DELETE`, method="POST", style="display:inline")
-                                    button(type="submit") Eliminar
+            tbody
+                each paciente in pacientes
+                    tr
+                        td #{paciente.nombre}
+                        td #{paciente.apellido}
+                        td #{paciente.dni}
+                        td #{paciente.fechaNacimiento}
+                        td #{paciente.telefono}
+                        td #{paciente.email}
+                        td #{paciente.direccion}
+                        td #{paciente.obraSocial}
+                        td #{paciente.fechaAlta}
+                        td
+                            a(href=`/pacientes/editar/${paciente.dni}`) 
+                                button Modificar
+                            form(action=`/pacientes/${paciente.dni}?_method=DELETE`, method="POST", style="display:inline")
+                                button(type="submit") Eliminar
