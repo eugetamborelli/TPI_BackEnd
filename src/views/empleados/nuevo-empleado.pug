@@ -1,0 +1,69 @@
+doctype html
+html
+  head
+    title Clínica Médica - Salud Integral
+  body
+    h1 Clínica Médica - Salud Integral
+    h2 Gestión de Empleados
+    br
+    ul
+      li
+        a(href="/empleados/listado") Listado de Empleados
+      li
+        a(href="/empleados/nuevo-empleado") Alta de empleados
+      li
+        a(href="/empleados") Volver al Menú de Gestión de Empleados
+    br
+
+    h3 Alta de nuevo empleado
+
+    if error
+      p(style="color:red")= error
+
+    form(action="/empleados/nuevo-empleado" method="POST")
+      div
+        label(for="nombre") Nombre:
+        input(type="text" name="nombre" required value=(formData && formData.nombre))
+
+      div
+        label(for="apellido") Apellido:
+        input(type="text" name="apellido" required value=(formData && formData.apellido))
+
+      div
+        label(for="dni") DNI:
+        input(type="text" name="dni" required value=(formData && formData.dni))
+
+      // Rol con select
+      div
+        label(for="rol") Rol:
+        select(name="rol" required)
+          option(value="" disabled selected=!(formData && formData.rol)) Seleccioná un rol
+          each r in ROLES
+            option(value=r selected=(formData && formData.rol===r))= r
+
+      // Área con select
+      div
+        label(for="area") Área:
+        select(name="area" required)
+          option(value="" disabled selected=!(formData && formData.area)) Seleccioná un área
+          each a in AREAS
+            option(value=a selected=(formData && formData.area===a))= a
+
+      div
+        label(for="telefono") Teléfono:
+        input(type="text" name="telefono" value=(formData && formData.telefono))
+
+      div
+        label(for="email") Email:
+        input(type="email" name="email" value=(formData && formData.email))
+
+      div
+        label(for="fechaAlta") Fecha de Alta:
+        input(type="date" name="fechaAlta" value=(formData && formData.fechaAlta))
+
+      div
+        label(for="activo") Activo:
+        input(type="checkbox" name="activo" checked=!!(formData && formData.activo))
+
+      br
+      button(type="submit") Guardar Empleado
