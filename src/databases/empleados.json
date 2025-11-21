@@ -51,13 +51,9 @@
     "rol": "enfermera",
     "area": "Atención Médica",
     "createdAt": "2025-09-19T16:40:24.164Z",
-<<<<<<< HEAD
     "updatedAt": "2025-09-19T16:40:24.164Z",
     "email": "lucia.fernandez@saludintegral.com",
     "password": "$2b$10$ej6Q3l5s3Ss4PrrKKw3Hxe3IwgV7GPdQ2XtOpYtlydbxiSgP47SRS"
-=======
-    "updatedAt": "2025-09-19T16:40:24.164Z"
->>>>>>> betaniagonzalez@refactortotal
   },
   {
     "id": 106,
@@ -67,12 +63,8 @@
     "rol": "enfermera",
     "area": "Emergencias",
     "createdAt": "2025-11-12T20:27:12.495Z",
-<<<<<<< HEAD
     "updatedAt": "2025-11-12T20:27:12.495Z",
     "email": "maria.gonzalez@saludintegral.com",
     "password": "$2b$10$amYXPjFw.O9j2elgmoftuO061dek1533.CsjTLiSNA4z/uiWp6E3G"
-=======
-    "updatedAt": "2025-11-12T20:27:12.495Z"
->>>>>>> betaniagonzalez@refactortotal
   }
 ]

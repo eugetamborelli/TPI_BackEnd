@@ -1,19 +1,36 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
 import { normalizeDate, isDateInRange } from "./empleados.utils.js";
-<<<<<<< HEAD
 import { hashPassword } from "../auth/password.utils.js";
 import { isEmpleadoEmail, validateEmailForUserType } from "../auth/email-domain.utils.js";
-=======
->>>>>>> betaniagonzalez@refactortotal
 
 class EmpleadosModel extends BaseModel {
   constructor() {
     super("empleados");
-<<<<<<< HEAD
   }
 
-    validateData(empleado, isUpdate = false) {
+    // Helper privado para normalizar DNI
+  _normalizeDni(dni) {
+    return String(dni);
+  }
+
+  // Helper privado para validar DNI único
+  _validateUniqueDni(dni, excludeId = null) {
+    if (!dni) return;
+    
+    const empleados = this.getAll();
+    const dniNormalizado = this._normalizeDni(dni);
+    const existing = empleados.find(e => 
+      this._normalizeDni(e.dni) === dniNormalizado && 
+      (!excludeId || e.id !== excludeId)
+    );
+    
+    if (existing) {
+      throw new Error("Ya existe un empleado con ese DNI");
+    }
+  }
+
+  validateData(empleado, isUpdate = false) {
     const requiredFields = ['nombre', 'apellido', 'dni', 'rol', 'area'];
     ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
 
@@ -27,53 +44,21 @@ class EmpleadosModel extends BaseModel {
       throw new Error("Los empleados deben tener email con dominio corporativo (ej: @saludintegral.com)");
     }
 
-    if (empleado.dni) {
-      const existing = this.getByDni(empleado.dni);
-      if (existing && (!isUpdate || existing.id !== empleado.id)) {
-        throw new Error("Ya existe un empleado con ese DNI");
-      }
-    }
+    // Validar DNI único (se valida en create/update con el ID correspondiente)
+    // No validamos aquí porque en validateData no tenemos el contexto del ID
 
     // Validar password si se proporciona
     if (empleado.password !== undefined) {
       if (typeof empleado.password !== 'string' || empleado.password.length < 6) {
         throw new Error("La contraseña debe tener al menos 6 caracteres");
       }
-    } else if (!isUpdate) {
-      // Password es opcional, pero recomendado al crear
-      // No lanzamos error, solo validamos si se proporciona
     }
   }
 
   async create(empleado) {
-=======
-  }
+    // Validar DNI único antes de crear
+    this._validateUniqueDni(empleado.dni);
 
-  validateData(empleado, isUpdate = false) {
-    const requiredFields = ['nombre', 'apellido', 'dni', 'rol', 'area'];
-    ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
-
-    ValidationService.validateDni(empleado.dni);
-
-    if (empleado.dni) {
-      const existing = this.getByDni(empleado.dni);
-      if (existing && (!isUpdate || existing.id !== empleado.id)) {
-        throw new Error("Ya existe un empleado con ese DNI");
-      }
-    }
-  }
-
-  create(empleado) {
->>>>>>> betaniagonzalez@refactortotal
-    const empleados = this.getAll();
-    
-    const dni = String(empleado.dni ?? "");
-    const dniYaExiste = dni ? empleados.some((e) => String(e.dni) === dni) : false;
-    if (dniYaExiste) {
-      throw new Error("DNI ya existente");
-    }
-
-<<<<<<< HEAD
     // Hashear password si se proporciona
     if (empleado.password) {
       empleado.password = await hashPassword(empleado.password);
@@ -83,32 +68,19 @@ class EmpleadosModel extends BaseModel {
   }
 
   async update(id, patch) {
-=======
-    return super.create(empleado);
-  }
+    const empleado = this.getById(id);
+    if (!empleado) return null;
 
-  update(id, patch) {
->>>>>>> betaniagonzalez@refactortotal
-    const empleados = this.getAll();
-    const index = empleados.findIndex((e) => e.id === Number(id));
-    if (index === -1) return null;
-
-    if (patch.dni != null) {
-      const nuevoDni = String(patch.dni);
-      const existeOtro = empleados.some((e, i) => i !== index && String(e.dni) === nuevoDni);
-      if (existeOtro) {
-        throw new Error("DNI ya existente");
-      }
+    // Validar DNI único si se está actualizando
+    if (patch.dni !== undefined) {
+      this._validateUniqueDni(patch.dni, id);
     }
 
-<<<<<<< HEAD
     // Hashear password si se proporciona en el update
     if (patch.password) {
       patch.password = await hashPassword(patch.password);
     }
 
-=======
->>>>>>> betaniagonzalez@refactortotal
     return super.update(id, patch);
   }
 
