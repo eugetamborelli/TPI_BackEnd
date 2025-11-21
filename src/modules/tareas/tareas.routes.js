@@ -8,8 +8,12 @@ import {
     validarEstado,
     validarPrioridad
 } from "./tareas.middleware.js";
+import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
+
+// Todas las rutas de tareas requieren autenticación y que el usuario sea empleado
+router.use(authenticate, requireEmpleado);
 
 router.get("/fecha", tareasController.getTareasByFecha);
 router.get("/estado/:estado", tareasController.getTareasByEstado);

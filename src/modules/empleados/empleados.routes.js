@@ -1,8 +1,12 @@
 import { Router } from "express";
 import empleadosController from "./empleados.controller.js";
 import { validarCampos } from "./empleados.middleware.js";
+import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
+
+// Todas las rutas de empleados requieren autenticación y que el usuario sea empleado
+router.use(authenticate, requireEmpleado);
 
 router.get("/rol/:rol", empleadosController.getEmpleadosByRol);
 router.get("/area/:area", empleadosController.getEmpleadosByArea);
