@@ -1,10 +1,52 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
 import { normalizeDate, isDateInRange } from "./empleados.utils.js";
+<<<<<<< HEAD
+import { hashPassword } from "../auth/password.utils.js";
+import { isEmpleadoEmail, validateEmailForUserType } from "../auth/email-domain.utils.js";
+=======
+>>>>>>> betaniagonzalez@refactortotal
 
 class EmpleadosModel extends BaseModel {
   constructor() {
     super("empleados");
+<<<<<<< HEAD
+  }
+
+    validateData(empleado, isUpdate = false) {
+    const requiredFields = ['nombre', 'apellido', 'dni', 'rol', 'area'];
+    ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
+
+    ValidationService.validateDni(empleado.dni);
+    
+    // Validar email si se proporciona
+    ValidationService.validateEmail(empleado.email);
+    
+    // Validar que el email tenga dominio corporativo (regla de negocio)
+    if (empleado.email && !isEmpleadoEmail(empleado.email)) {
+      throw new Error("Los empleados deben tener email con dominio corporativo (ej: @saludintegral.com)");
+    }
+
+    if (empleado.dni) {
+      const existing = this.getByDni(empleado.dni);
+      if (existing && (!isUpdate || existing.id !== empleado.id)) {
+        throw new Error("Ya existe un empleado con ese DNI");
+      }
+    }
+
+    // Validar password si se proporciona
+    if (empleado.password !== undefined) {
+      if (typeof empleado.password !== 'string' || empleado.password.length < 6) {
+        throw new Error("La contraseña debe tener al menos 6 caracteres");
+      }
+    } else if (!isUpdate) {
+      // Password es opcional, pero recomendado al crear
+      // No lanzamos error, solo validamos si se proporciona
+    }
+  }
+
+  async create(empleado) {
+=======
   }
 
   validateData(empleado, isUpdate = false) {
@@ -22,6 +64,7 @@ class EmpleadosModel extends BaseModel {
   }
 
   create(empleado) {
+>>>>>>> betaniagonzalez@refactortotal
     const empleados = this.getAll();
     
     const dni = String(empleado.dni ?? "");
@@ -30,10 +73,22 @@ class EmpleadosModel extends BaseModel {
       throw new Error("DNI ya existente");
     }
 
+<<<<<<< HEAD
+    // Hashear password si se proporciona
+    if (empleado.password) {
+      empleado.password = await hashPassword(empleado.password);
+    }
+
+    return super.create(empleado);
+  }
+
+  async update(id, patch) {
+=======
     return super.create(empleado);
   }
 
   update(id, patch) {
+>>>>>>> betaniagonzalez@refactortotal
     const empleados = this.getAll();
     const index = empleados.findIndex((e) => e.id === Number(id));
     if (index === -1) return null;
@@ -46,6 +101,14 @@ class EmpleadosModel extends BaseModel {
       }
     }
 
+<<<<<<< HEAD
+    // Hashear password si se proporciona en el update
+    if (patch.password) {
+      patch.password = await hashPassword(patch.password);
+    }
+
+=======
+>>>>>>> betaniagonzalez@refactortotal
     return super.update(id, patch);
   }
 

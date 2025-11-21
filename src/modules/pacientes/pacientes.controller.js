@@ -13,12 +13,23 @@ export const renderDashboard = (req, res) => {
 export const getPacientesListado = async(req, res) => {
     try {
         let pacientes = await pacienteModel.getAllPacientes();
+        // No incluir password en los datos enviados a la vista
+        pacientes = pacientes.map(({ password, ...rest }) => rest);
 
         const { dni } = req.query;
         if (dni) {
             try {
                 const paciente = await pacienteModel.getPacienteByDni(dni);
+<<<<<<< HEAD
+                if (paciente) {
+                    const { password, ...pacienteSinPassword } = paciente;
+                    pacientes = [pacienteSinPassword];
+                } else {
+                    pacientes = [];
+                }
+=======
                 pacientes = paciente ? [paciente] : [];
+>>>>>>> betaniagonzalez@refactortotal
             } catch (error) {
                 // Si no encuentra por DNI, mostrar lista vacía
                 pacientes = [];
@@ -56,7 +67,9 @@ export const addPaciente = async (req, res) => {
 export const renderEditarPaciente = async (req, res) => {
     try {
         const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
-        res.render("pacientes/editarPaciente", { paciente });
+        // No incluir password en los datos enviados a la vista
+        const { password, ...pacienteSinPassword } = paciente;
+        res.render("pacientes/editarPaciente", { paciente: pacienteSinPassword });
     } catch (error) {
         res.redirect("/pacientes/listado");
     }
@@ -70,9 +83,16 @@ export const updatePaciente = async (req, res) => {
         // En caso de error, necesitamos obtener el paciente original para el formulario
         try {
             const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
+<<<<<<< HEAD
+            const { password, ...pacienteSinPassword } = paciente;
+            res.status(400).render("pacientes/editarPaciente", { 
+                error: error.message, 
+                paciente: { ...pacienteSinPassword, ...req.body }
+=======
             res.status(400).render("pacientes/editarPaciente", { 
                 error: error.message, 
                 paciente: { ...paciente, ...req.body }
+>>>>>>> betaniagonzalez@refactortotal
             });
         } catch (getError) {
             res.redirect("/pacientes/listado");

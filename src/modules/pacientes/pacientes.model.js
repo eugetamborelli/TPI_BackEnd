@@ -1,5 +1,9 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
+<<<<<<< HEAD
+import { hashPassword } from "../auth/password.utils.js";
+=======
+>>>>>>> betaniagonzalez@refactortotal
 
 export default class Paciente extends BaseModel {
     constructor() {
@@ -22,15 +26,36 @@ export default class Paciente extends BaseModel {
                 throw new Error("La fecha de alta no puede ser anterior a la fecha de nacimiento");
             }
         }
+<<<<<<< HEAD
+
+        // Validar password si se proporciona
+        if (datosPaciente.password !== undefined) {
+            if (typeof datosPaciente.password !== 'string' || datosPaciente.password.length < 6) {
+                throw new Error("La contraseña debe tener al menos 6 caracteres");
+            }
+        }
+    }
+
+    async create(datosPaciente) {
+=======
     }
 
     create(datosPaciente) {
+>>>>>>> betaniagonzalez@refactortotal
         const pacientes = this.getAll();
         const existing = pacientes.find(p => Number(p.dni) === Number(datosPaciente.dni));
         if (existing) {
             throw new Error(`Ya existe un paciente con el DNI ${datosPaciente.dni}`);
         }
 
+<<<<<<< HEAD
+        // Hashear password si se proporciona
+        if (datosPaciente.password) {
+            datosPaciente.password = await hashPassword(datosPaciente.password);
+        }
+
+=======
+>>>>>>> betaniagonzalez@refactortotal
         return super.create(datosPaciente);
     }
 
@@ -50,9 +75,26 @@ export default class Paciente extends BaseModel {
         return this.findBy('dni', Number(dni))[0] || null;
     }
 
+<<<<<<< HEAD
+    getByDni(dni) {
+        // Buscar por DNI como número o string
+        const pacientes = this.getAll();
+        const dniStr = String(dni);
+        const dniNum = Number(dni);
+        
+        return pacientes.find(p => 
+            String(p.dni) === dniStr || Number(p.dni) === dniNum
+        ) || null;
+    }
+
+    async addPaciente(datosPaciente) {
+        try {
+            return await this.create(datosPaciente);
+=======
     async addPaciente(datosPaciente) {
         try {
             return this.create(datosPaciente);
+>>>>>>> betaniagonzalez@refactortotal
         } catch (error) {
             throw error;
         }
@@ -68,6 +110,14 @@ export default class Paciente extends BaseModel {
 
         const {id, dni: dniParam, createdAt, ...allowedUpdates} = datosPaciente;
 
+<<<<<<< HEAD
+        // Hashear password si se proporciona en el update
+        if (allowedUpdates.password) {
+            allowedUpdates.password = await hashPassword(allowedUpdates.password);
+        }
+
+=======
+>>>>>>> betaniagonzalez@refactortotal
         try {
             const updated = this.update(paciente.id, allowedUpdates);
             if (!updated) {
