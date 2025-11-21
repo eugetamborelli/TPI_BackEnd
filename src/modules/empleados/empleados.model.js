@@ -9,7 +9,7 @@ class EmpleadosModel extends BaseModel {
     super("empleados");
   }
 
-    // Helper privado para normalizar DNI
+  // Helper privado para normalizar DNI
   _normalizeDni(dni) {
     return String(dni);
   }
@@ -17,14 +17,14 @@ class EmpleadosModel extends BaseModel {
   // Helper privado para validar DNI único
   _validateUniqueDni(dni, excludeId = null) {
     if (!dni) return;
-    
+
     const empleados = this.getAll();
     const dniNormalizado = this._normalizeDni(dni);
-    const existing = empleados.find(e => 
-      this._normalizeDni(e.dni) === dniNormalizado && 
+    const existing = empleados.find(e =>
+      this._normalizeDni(e.dni) === dniNormalizado &&
       (!excludeId || e.id !== excludeId)
     );
-    
+
     if (existing) {
       throw new Error("Ya existe un empleado con ese DNI");
     }
@@ -35,17 +35,14 @@ class EmpleadosModel extends BaseModel {
     ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
 
     ValidationService.validateDni(empleado.dni);
-    
+
     // Validar email si se proporciona
     ValidationService.validateEmail(empleado.email);
-    
+
     // Validar que el email tenga dominio corporativo (regla de negocio)
     if (empleado.email && !isEmpleadoEmail(empleado.email)) {
       throw new Error("Los empleados deben tener email con dominio corporativo (ej: @saludintegral.com)");
     }
-
-    // Validar DNI único (se valida en create/update con el ID correspondiente)
-    // No validamos aquí porque en validateData no tenemos el contexto del ID
 
     // Validar password si se proporciona
     if (empleado.password !== undefined) {
@@ -99,4 +96,4 @@ class EmpleadosModel extends BaseModel {
   remove(id) { return this.delete(id); }
 }
 
-export default EmpleadosModel;       
+export default EmpleadosModel;

@@ -6,20 +6,11 @@
     "dni": "32123456",
     "rol": "recepcionista",
     "area": "Administración de Turnos",
-    "updatedAt": "2025-09-15T22:57:25.109Z",
-    "email": "carla.mendez@saludintegral.com",
-    "password": "$2b$10$hRaxhUaRTMVhH.p44Z5a.uO70ddIUxBYGwUWpEfkPPJgzpJJT/d7O"
-  },
-  {
-    "id": 102,
-    "nombre": "Juan",
-    "apellido": "Pérez",
-    "dni": "28999111",
-    "rol": "médico",
-    "area": "Atención Médica",
-    "updatedAt": "2025-09-15T23:00:24.787Z",
-    "email": "juan.perez@saludintegral.com",
-    "password": "$2b$10$7YKCoDl9cp7CDISuMvyRn.j40owzAWwvGKh/weuB9Fbav31wRkTsa"
+    "updatedAt": "2025-10-29T20:54:50.751Z",
+    "telefono": "1144455566",
+    "email": "carla.mendez@clinicaintegral.com",
+    "fechaAlta": "2025-10-15",
+    "activo": "on"
   },
   {
     "id": 103,
@@ -51,20 +42,20 @@
     "rol": "enfermera",
     "area": "Atención Médica",
     "createdAt": "2025-09-19T16:40:24.164Z",
-    "updatedAt": "2025-09-19T16:40:24.164Z",
-    "email": "lucia.fernandez@saludintegral.com",
-    "password": "$2b$10$ej6Q3l5s3Ss4PrrKKw3Hxe3IwgV7GPdQ2XtOpYtlydbxiSgP47SRS"
+    "updatedAt": "2025-09-19T16:40:24.164Z"
   },
   {
     "id": 106,
-    "nombre": "María",
-    "apellido": "González",
-    "dni": "35555666",
-    "rol": "enfermera",
-    "area": "Emergencias",
-    "createdAt": "2025-11-12T20:27:12.495Z",
-    "updatedAt": "2025-11-12T20:27:12.495Z",
-    "email": "maria.gonzalez@saludintegral.com",
-    "password": "$2b$10$amYXPjFw.O9j2elgmoftuO061dek1533.CsjTLiSNA4z/uiWp6E3G"
+    "nombre": "Ana",
+    "apellido": "Lopez",
+    "dni": "31234567",
+    "rol": "médico",
+    "area": "Pediatría",
+    "telefono": "1155558888",
+    "email": "ana.lopez@clinicaintegral.com",
+    "fechaAlta": "2025-10-29",
+    "activo": true,
+    "createdAt": "2025-10-29T20:46:50.052Z",
+    "updatedAt": "2025-10-29T20:46:50.052Z"
   }
 ]

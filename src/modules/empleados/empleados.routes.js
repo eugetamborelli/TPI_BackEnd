@@ -1,20 +1,23 @@
 import { Router } from "express";
-import empleadosController from "./empleados.controller.js";
-import { validarCampos } from "./empleados.middleware.js";
-import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
+import {
+  renderDashboard,
+  renderNuevoEmpleado,
+  renderEditarEmpleado,
+  getEmpleadosListado,
+  addEmpleado,
+  updateEmpleado,
+  deleteEmpleado
+} from "./empleados.controller.js";
 
 const router = Router();
 
-// Todas las rutas de empleados requieren autenticación y que el usuario sea empleado
-router.use(authenticate, requireEmpleado);
-
-router.get("/rol/:rol", empleadosController.getEmpleadosByRol);
-router.get("/area/:area", empleadosController.getEmpleadosByArea);
-router.get("/dni/:dni", empleadosController.getEmpleadoByDni);
-router.get("/", empleadosController.getEmpleados);
-router.get("/:id", empleadosController.getEmpleado);
-router.post("/", empleadosController.addEmpleado);
-router.patch("/:id", validarCampos, empleadosController.editEmpleado);
-router.delete("/:id", empleadosController.removeEmpleado);
+// Vistas + CRUD (orden específico; NADA de "/:id" aquí)
+router.get("/", renderDashboard);
+router.get("/listado", getEmpleadosListado);
+router.get("/nuevo-empleado", renderNuevoEmpleado);
+router.post("/nuevo-empleado", addEmpleado);
+router.get("/editar/:id", renderEditarEmpleado);
+router.patch("/editar/:id", updateEmpleado);
+router.delete("/:id", deleteEmpleado);
 
 export default router;
