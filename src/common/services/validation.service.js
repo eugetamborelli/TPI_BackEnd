@@ -23,9 +23,19 @@ class ValidationService {
         }
     }
 
-    static validateDni(dni) {
-        if (dni && isNaN(Number(dni))) {
+    static validateDni(dni, validateFormat = false) {
+        if (!dni) return;
+        
+        if (isNaN(Number(dni))) {
             throw new Error("DNI debe ser un número válido");
+        }
+        
+        // Validar formato (7-8 dígitos) si se solicita
+        if (validateFormat) {
+            const dniStr = String(dni).trim();
+            if (!/^\d{7,8}$/.test(dniStr)) {
+                throw new Error("El DNI debe tener entre 7 y 8 dígitos numéricos");
+            }
         }
     }
 
