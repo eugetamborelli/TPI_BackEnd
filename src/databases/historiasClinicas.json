@@ -1,0 +1,39 @@
+[
+  {
+    "id": 1,
+    "pacienteId": 1,
+    "fechaCreacion": "2023-01-15",
+    "alergias": ["Penicilina", "Polen"],
+    "medicamentosActuales": [
+      {
+        "nombre": "Ibuprofeno",
+        "dosis": "400mg",
+        "frecuencia": "Cada 8 horas"
+      }
+    ],
+    "antecedentes": {
+      "familiares": ["Diabetes tipo 2 en padre"],
+      "personales": ["Hipertensión"],
+      "quirurgicos": ["Apendicectomía en 2010"]
+    },
+    "observaciones": "Paciente con seguimiento regular",
+    "createdAt": "2023-01-15T10:00:00.000Z",
+    "updatedAt": "2023-01-15T10:00:00.000Z"
+  },
+  {
+    "id": 2,
+    "pacienteId": 2,
+    "fechaCreacion": "2023-02-20",
+    "alergias": [],
+    "medicamentosActuales": [],
+    "antecedentes": {
+      "familiares": [],
+      "personales": [],
+      "quirurgicos": []
+    },
+    "observaciones": "Paciente nuevo, sin antecedentes relevantes",
+    "createdAt": "2023-02-20T10:00:00.000Z",
+    "updatedAt": "2023-02-20T10:00:00.000Z"
+  }
+]
+

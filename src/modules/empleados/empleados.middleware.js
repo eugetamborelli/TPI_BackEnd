@@ -1,34 +1,36 @@
+import ValidationService from "../../common/services/validation.service.js";
+import ResponseService from "../../common/services/response.service.js";
+
 export const validarCampos = (req, res, next) => {
     const { nombre, apellido, dni, rol, area } = req.body;
 
+    // Validar que haya al menos un campo para actualizar
     if (!nombre && !apellido && !dni && !rol && !area) {
-        return res.status(400).json({
-            error: "Debe proporcionar al menos un campo para actualizar: nombre, apellido, dni, rol, area"
-        });
+        return ResponseService.badRequest(res, 
+            "Debe proporcionar al menos un campo para actualizar: nombre, apellido, dni, rol, area"
+        );
     }
 
-    if (nombre !== undefined && (!nombre || nombre.trim() === "")) {
-        return res.status(400).json({ error: "El nombre no puede estar vacío" });
-    }
-    if (apellido !== undefined && (!apellido || apellido.trim() === "")) {
-        return res.status(400).json({ error: "El apellido no puede estar vacío" });
-    }
-    if (dni !== undefined && (!dni || String(dni).trim() === "")) {
-        return res.status(400).json({ error: "El DNI no puede estar vacío" });
-    }
-    if (rol !== undefined && (!rol || rol.trim() === "")) {
-        return res.status(400).json({ error: "El rol no puede estar vacío" });
-    }
-    if (area !== undefined && (!area || area.trim() === "")) {
-        return res.status(400).json({ error: "El área no puede estar vacía" });
-    }
+    // Validar campos no vacíos si se proporcionan
+    const validations = [
+        { field: nombre, name: "nombre" },
+        { field: apellido, name: "apellido" },
+        { field: dni, name: "dni", isDni: true },
+        { field: rol, name: "rol" },
+        { field: area, name: "área" }
+    ];
 
-    if (dni !== undefined) {
-        const dniStr = String(dni).trim();
-        if (!/^\d{7,8}$/.test(dniStr)) {
-            return res.status(400).json({
-                error: "El DNI debe tener entre 7 y 8 dígitos numéricos"
-            });
+    for (const { field, name, isDni } of validations) {
+        if (field !== undefined) {
+            if (isDni) {
+                try {
+                    ValidationService.validateDni(field, true);
+                } catch (error) {
+                    return ResponseService.badRequest(res, error.message);
+                }
+            } else if (!field || String(field).trim() === "") {
+                return ResponseService.badRequest(res, `El ${name} no puede estar vacío`);
+            }
         }
     }
 

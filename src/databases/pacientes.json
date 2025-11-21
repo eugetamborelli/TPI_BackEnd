@@ -12,8 +12,9 @@
     "fechaAlta": "2023-01-15",
     "historiaClinicaId": 1,
     "createdAt": "2025-09-18T12:00:00.000Z",
-    "updatedAt": "2025-11-19T02:54:16.281Z",
-    "_method": "PATCH"
+    "updatedAt": "2025-09-21T20:15:38.036Z",
+    "_method": "PATCH",
+    "password": "$2b$10$6qzhJexnPF4V1RrQBUsJWumoWjaBjFGJLlz3UXUD7SyHyPFx7bgcO"
   },
   {
     "id": 2,
@@ -29,5 +30,19 @@
     "historiaClinicaId": 2,
     "createdAt": "2025-09-18T12:05:00.000Z",
     "updatedAt": "2025-09-18T12:05:00.000Z"
+  },
+  {
+    "id": 3,
+    "nombre": "Ana",
+    "apellido": "Rodriguez",
+    "dni": "41123456",
+    "fechaNacimiento": "1992-03-15",
+    "telefono": "1145678901",
+    "email": "ana.rodriguez@email.com",
+    "direccion": "San Martin 456",
+    "obraSocial": "Galeno",
+    "fechaAlta": "2025-11-12",
+    "createdAt": "2025-11-12T20:37:33.186Z",
+    "updatedAt": "2025-11-12T20:37:33.186Z"
   }
 ]
