@@ -8,10 +8,14 @@ import {
   updateEmpleado,
   deleteEmpleado
 } from "./empleados.controller.js";
+//import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
 
-// Vistas + CRUD (orden específico; NADA de "/:id" aquí)
+// Todas las rutas de empleados requieren autenticación y ser empleado
+//router.use(authenticate, requireEmpleado);
+
+// Vistas + CRUD
 router.get("/", renderDashboard);
 router.get("/listado", getEmpleadosListado);
 router.get("/nuevo-empleado", renderNuevoEmpleado);

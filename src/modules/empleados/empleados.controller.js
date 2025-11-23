@@ -17,7 +17,7 @@ export const renderDashboard = (req, res) => {
   res.render("empleados/dashboard", { titulo: "Gestión de Empleados" });
 };
 
-// LISTADO (DNI tiene prioridad sobre ROL) + pasamos ROLES para el filtro select
+// LISTADO (DNI tiene prioridad sobre ROL) + pasa ROLES para el filtro select
 export const getEmpleadosListado = async (req, res) => {
   try {
     let empleados = await model.getAll();
@@ -53,12 +53,12 @@ export const getEmpleadosListado = async (req, res) => {
   }
 };
 
-// NUEVO (form) — pasamos ROLES y AREAS para los <select>
+// NUEVO (form) —  ROLES y AREAS para los <select>
 export const renderNuevoEmpleado = (req, res) => {
   res.render("empleados/nuevo-empleado", { titulo: "Alta de empleado", formData: {}, ROLES, AREAS });
 };
 
-// CREAR (POST) — validamos que rol/area estén en las listas
+// CREAR (POST) — valida que rol/area estén en las listas
 export const addEmpleado = async (req, res) => {
   try {
     const {
@@ -150,7 +150,7 @@ export const updateEmpleado = async (req, res) => {
 
     const payload = { ...req.body };
     if (Object.prototype.hasOwnProperty.call(payload, "activo")) {
-      payload.activo = !!payload.activo; // checkbox → boolean
+      payload.activo = !!payload.activo; // checkbox : boolean
     }
 
     if (payload.rol && !ROLES.includes(payload.rol)) {

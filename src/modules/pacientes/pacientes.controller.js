@@ -10,16 +10,16 @@ export const renderDashboard = (req, res) => {
 }
 
 //Menú Listados
-export const getPacientesListado = (req, res) => {
+export const getPacientesListado = async (req, res) => {
     try {
-        let pacientes = pacienteModel.getAllPacientes();
+        let pacientes = await pacienteModel.getAllPacientes();
         // No incluir password en los datos enviados a la vista
         pacientes = pacientes.map(({ password, ...rest }) => rest);
 
         const { dni } = req.query;
         if (dni) {
             try {
-                const paciente = pacienteModel.getPacienteByDni(dni);
+                const paciente = await pacienteModel.getPacienteByDni(dni);
                 pacientes = paciente ? [paciente] : [];
             } catch (error) {
                 // Si no encuentra por DNI, mostrar lista vacía
@@ -41,9 +41,9 @@ export const renderNuevoPaciente = (req, res) => {
     });
 }
 
-export const addPaciente = (req, res) => {
+export const addPaciente = async (req, res) => {
     try {
-        pacienteModel.addPaciente(req.body);
+        await pacienteModel.addPaciente(req.body);
         res.redirect("/pacientes/listado");
     } catch (error) {
         res.status(400).render("pacientes/nuevoPaciente", { 
@@ -55,9 +55,9 @@ export const addPaciente = (req, res) => {
 }
 
 //Menú actualizar paciente
-export const renderEditarPaciente = (req, res) => {
+export const renderEditarPaciente = async (req, res) => {
     try {
-        const paciente = pacienteModel.getPacienteByDni(req.params.dni);
+        const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
         // No incluir password en los datos enviados a la vista
         const { password, ...pacienteSinPassword } = paciente;
         res.render("pacientes/editarPaciente", { paciente: pacienteSinPassword });
@@ -66,14 +66,14 @@ export const renderEditarPaciente = (req, res) => {
     }
 }
 
-export const updatePaciente = (req, res) => {
+export const updatePaciente = async (req, res) => {
     try {
-        pacienteModel.updatePaciente(req.params.dni, req.body);
+        await pacienteModel.updatePaciente(req.params.dni, req.body);
         res.redirect("/pacientes/listado");
     } catch (error) {
         // En caso de error, necesitamos obtener el paciente original para el formulario
         try {
-            const paciente = pacienteModel.getPacienteByDni(req.params.dni);
+            const paciente = await pacienteModel.getPacienteByDni(req.params.dni);
             res.status(400).render("pacientes/editarPaciente", { 
                 error: error.message, 
                 paciente: { ...paciente, ...req.body }
@@ -84,13 +84,13 @@ export const updatePaciente = (req, res) => {
     }
 }
 
-export const deletePaciente = (req, res) => {
+export const deletePaciente = async (req, res) => {
     try {
-        pacienteModel.deletePaciente(req.params.dni);
+        await pacienteModel.deletePaciente(req.params.dni);
         res.redirect("/pacientes/listado");
     } catch (error) {
         // En caso de error al eliminar, redirigir con mensaje de error
-        const pacientes = pacienteModel.getAllPacientes();
+        const pacientes = await pacienteModel.getAllPacientes();
         res.render("pacientes/listado", { 
             pacientes, 
             error: error.message,

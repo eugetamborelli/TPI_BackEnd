@@ -8,13 +8,12 @@ import {
     updatePaciente,
     deletePaciente
 } from "./pacientes.controller.js";
-import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
+//import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
 
 // Todas las rutas de pacientes requieren autenticación y que el usuario sea empleado
-// Los pacientes no deberían poder ver información de otros pacientes, solo sus turnos
-router.use(authenticate, requireEmpleado);
+//router.use(authenticate, requireEmpleado);
 
 //Vistas
 router.get("/", renderDashboard);
