@@ -1,6 +1,5 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
-import { normalizeDate, isDateInRange } from "./empleados.utils.js";
 import { hashPassword } from "../auth/password.utils.js";
 import { isEmpleadoEmail, validateEmailForUserType } from "../auth/email-domain.utils.js";
 

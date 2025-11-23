@@ -12,21 +12,21 @@ class BaseModel {
         throw new Error("validateData debe ser implementado por la clase hija");
     }
 
-    getAll() {
+    async getAll() {
         return FileService.readJsonFile(this.fileName);
     }
 
-    getById(id) {
+    async getById(id) {
         const data = this.getAll();
         return data.find(item => item.id === Number(id)) || null;
     }
 
-    findBy(field, value) {
+    async findBy(field, value) {
         const data = this.getAll();
         return data.filter(item => item[field] === value);
     }
 
-    create(itemData) {
+    async create(itemData) {
         this.validateData(itemData, false);
 
         const data = this.getAll();
@@ -50,7 +50,7 @@ class BaseModel {
         return newItem;
     }
 
-    update(id, updates) {
+    async update(id, updates) {
         this.validateData(updates, true);
 
         const data = this.getAll();
@@ -74,7 +74,7 @@ class BaseModel {
         return data[index];
     }
 
-    delete(id) {
+    async delete(id) {
         const data = this.getAll();
         const filteredData = data.filter(item => item.id !== Number(id));
         
@@ -90,7 +90,7 @@ class BaseModel {
         return wasDeleted;
     }
 
-    filterBy(field, value) {
+    async filterBy(field, value) {
         return this.getAll().filter(item => {
             const itemValue = item[field];
             if (typeof itemValue === 'string' && typeof value === 'string') {
