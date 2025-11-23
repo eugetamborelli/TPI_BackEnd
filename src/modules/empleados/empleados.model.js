@@ -1,7 +1,7 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
 import { hashPassword } from "../auth/password.utils.js";
-import { isEmpleadoEmail, validateEmailForUserType } from "../auth/email-domain.utils.js";
+import { isEmpleadoEmail } from "../auth/email-domain.utils.js";
 
 class EmpleadosModel extends BaseModel {
   constructor() {
@@ -14,10 +14,10 @@ class EmpleadosModel extends BaseModel {
   }
 
   // Helper privado para validar DNI único
-  _validateUniqueDni(dni, excludeId = null) {
+  async _validateUniqueDni(dni, excludeId = null) {
     if (!dni) return;
 
-    const empleados = this.getAll();
+    const empleados = await this.getAll();
     const dniNormalizado = this._normalizeDni(dni);
     const existing = empleados.find(e =>
       this._normalizeDni(e.dni) === dniNormalizado &&
@@ -53,7 +53,7 @@ class EmpleadosModel extends BaseModel {
 
   async create(empleado) {
     // Validar DNI único antes de crear
-    this._validateUniqueDni(empleado.dni);
+    await this._validateUniqueDni(empleado.dni);
 
     // Hashear password si se proporciona
     if (empleado.password) {
@@ -64,7 +64,7 @@ class EmpleadosModel extends BaseModel {
   }
 
   async update(id, patch) {
-    const empleado = this.getById(id);
+    const empleado = await this.getById(id);
     if (!empleado) return null;
 
     // Validar DNI único si se está actualizando
@@ -80,19 +80,19 @@ class EmpleadosModel extends BaseModel {
     return super.update(id, patch);
   }
 
-  filterByRol(rol) {
+  async filterByRol(rol) {
     return this.filterBy('rol', rol);
   }
 
-  filterByArea(area) {
+  async filterByArea(area) {
     return this.filterBy('area', area);
   }
 
-  getByDni(dni) {
+  async getByDni(dni) {
     return this.findBy('dni', String(dni))[0] || null;
   }
 
-  remove(id) { return this.delete(id); }
+  async remove(id) { return this.delete(id); }
 }
 
 export default EmpleadosModel;

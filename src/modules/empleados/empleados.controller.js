@@ -1,8 +1,7 @@
-// src/modules/empleados/empleados.controller.js
 import EmpleadosModel from "./empleados.model.js";
 const model = new EmpleadosModel();
 
-// Listas predeterminadas (sin archivo extra)
+// Listas predeterminadas
 const ROLES = [
   "médico", "enfermera", "recepcionista", "administrador",
   "encargado de stock", "laboratorista", "kinesiólogo"
@@ -19,9 +18,9 @@ export const renderDashboard = (req, res) => {
 };
 
 // LISTADO (DNI tiene prioridad sobre ROL) + pasamos ROLES para el filtro select
-export const getEmpleadosListado = (req, res) => {
+export const getEmpleadosListado = async (req, res) => {
   try {
-    let empleados = model.getAll();
+    let empleados = await model.getAll();
 
     const rawDni = req.query.dni ?? "";
     const rawRol = req.query.rol ?? "";
@@ -60,7 +59,7 @@ export const renderNuevoEmpleado = (req, res) => {
 };
 
 // CREAR (POST) — validamos que rol/area estén en las listas
-export const addEmpleado = (req, res) => {
+export const addEmpleado = async (req, res) => {
   try {
     const {
       nombre, apellido, dni, rol, area, telefono, email, fechaAlta
@@ -89,7 +88,7 @@ export const addEmpleado = (req, res) => {
       });
     }
 
-    model.create({
+    await model.create({
       nombre, apellido, dni, rol, area,
       telefono: telefono || "",
       email: email || "",
@@ -108,18 +107,18 @@ export const addEmpleado = (req, res) => {
 };
 
 // EDITAR (form) — acepta :id como ID numérico o como DNI
-export const renderEditarEmpleado = (req, res) => {
+export const renderEditarEmpleado = async (req, res) => {
   try {
     const { id } = req.params;
     let empleado = null;
 
     // Si es número válido, intento por ID
     if (!isNaN(id)) {
-      empleado = model.getById(Number(id));
+      empleado = await model.getById(Number(id));
     }
     // Si no encontré o no era número, intento por DNI
     if (!empleado) {
-      empleado = model.getByDni(id);
+      empleado = await model.getByDni(id);
     }
 
     if (!empleado) return res.redirect("/empleados/listado");
@@ -130,16 +129,16 @@ export const renderEditarEmpleado = (req, res) => {
 };
 
 // ACTUALIZAR (PATCH) — también acepta :id como ID o DNI
-export const updateEmpleado = (req, res) => {
+export const updateEmpleado = async (req, res) => {
   try {
     const { id } = req.params;
     let target = null;
 
     if (!isNaN(id)) {
-      target = model.getById(Number(id));
+      target = await model.getById(Number(id));
     }
     if (!target) {
-      target = model.getByDni(id);
+      target = await model.getByDni(id);
     }
     if (!target) {
       return res.status(400).render("empleados/editarEmpleado", {
@@ -169,7 +168,7 @@ export const updateEmpleado = (req, res) => {
       });
     }
 
-    const emp = model.update(target.id, payload);
+    const emp = await model.update(target.id, payload);
     if (!emp) {
       return res.status(400).render("empleados/editarEmpleado", {
         error: "DNI en uso o empleado no encontrado",
@@ -189,12 +188,12 @@ export const updateEmpleado = (req, res) => {
 
 
 // ELIMINAR (DELETE)
-export const deleteEmpleado = (req, res) => {
+export const deleteEmpleado = async (req, res) => {
   try {
-    const ok = model.remove(req.params.id);
+    const ok = await model.remove(req.params.id);
     if (!ok) {
       return res.render("empleados/listado", {
-        empleados: model.getAll(),
+        empleados: await model.getAll(),
         error: "Empleado no encontrado",
         ROLES, AREAS
       });
