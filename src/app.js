@@ -12,7 +12,6 @@ import methodOverride from "method-override";
 app.use("/", medicosRouter);
 
 const app = express();
-const path = require('path');
 
 app.use(cors());
 app.use(express.json());
