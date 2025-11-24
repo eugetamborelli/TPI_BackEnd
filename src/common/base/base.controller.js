@@ -1,4 +1,5 @@
 import ResponseService from '../services/response.service.js';
+import { ValidationError } from '../errors/validation.error.js';
 
 class BaseController {
     constructor(model) {
@@ -8,18 +9,20 @@ class BaseController {
         this.model = model;
     }
 
-    getAll = (req, res) => {
+    // **** METODOS API *** 
+
+    getAll = async (req, res) => {
         try {
-            const data = this.model.getAll();
+            const data = await this.model.getAll();
             ResponseService.success(res, data);
         } catch (error) {
             ResponseService.serverError(res, "Error al obtener registros");
         }
     };
 
-    getById = (req, res) => {
+    getById = async (req, res) => {
         try {
-            const item = this.model.getById(req.params.id);
+            const item = await this.model.getById(req.params.id);
             if (!item) {
                 return ResponseService.notFound(res, "Registro no encontrado");
             }
@@ -29,14 +32,12 @@ class BaseController {
         }
     };
 
-    create = (req, res) => {
+    create = async (req, res) => {
         try {
-            const newItem = this.model.create(req.body);
+            const newItem = await this.model.create(req.body);
             ResponseService.created(res, newItem);
         } catch (error) {
-            if (error.message.includes("obligatorio") || 
-                error.message.includes("inválido") ||
-                error.message.includes("debe ser")) {
+            if (error instanceof ValidationError) {
                 ResponseService.badRequest(res, error.message);
             } else {
                 ResponseService.serverError(res, "Error al crear registro");
@@ -44,27 +45,25 @@ class BaseController {
         }
     };
 
-    update = (req, res) => {
+    update = async (req, res) => {
         try {
-            const updatedItem = this.model.update(req.params.id, req.body);
+            const updatedItem = await this.model.update(req.params.id, req.body);
             if (!updatedItem) {
                 return ResponseService.notFound(res, "Registro no encontrado");
             }
             ResponseService.success(res, updatedItem);
         } catch (error) {
-            if (error.message.includes("obligatorio") || 
-                error.message.includes("inválido") ||
-                error.message.includes("debe ser")) {
+            if (error instanceof ValidationError) {
                 ResponseService.badRequest(res, error.message);
             } else {
-                ResponseService.serverError(res, "Error al actualizar registro");
+                ResponseService.serverError(res, "Error al crear registro");
             }
         }
     };
 
-    delete = (req, res) => {
+    delete = async (req, res) => {
         try {
-            const deleted = this.model.delete(req.params.id);
+            const deleted = await this.model.delete(req.params.id);
             if (!deleted) {
                 return ResponseService.notFound(res, "Registro no encontrado");
             }
@@ -75,16 +74,46 @@ class BaseController {
     };
 
     createFilterHandler = (field, paramName = field) => {
-        return (req, res) => {
+        return async (req, res) => {
             try {
                 const value = req.params[paramName];
-                const filteredData = this.model.filterBy(field, value);
+                const filteredData = await this.model.filterBy(field, value);
                 ResponseService.success(res, filteredData);
             } catch (error) {
                 ResponseService.serverError(res, `Error al filtrar por ${field}`);
             }
         };
     };
+
+        // **** METODOS PARA RENDERIZAR *** 
+        
+        renderAll = async (req, res, viewName, extraData = {}) => {
+        try {
+            const data = await this.model.getAll();
+            res.render(viewName, { data, ...extraData });
+        } catch (error) {
+            res.render(viewName, { error: error.message, ...extraData });
+        }
+    };
+
+    renderById = async (req, res, viewName, extraData = {}) => {
+        try {
+            const item = await this.model.getById(req.params.id);
+            if (!item) return res.render(viewName, { error: "Registro no encontrado", ...extraData });
+            res.render(viewName, { item, ...extraData });
+        } catch (error) {
+            res.render(viewName, { error: error.message, ...extraData });
+        }
+    };
+
+    //manejo de errores de validación
+    _handleError(error, res, defaultMessage) {
+        const validationKeywords = ["obligatorio", "inválido", "debe ser", "deben ser", "existe"];
+        if (validationKeywords.some(keyword => error.message.includes(keyword))) {
+            return ResponseService.badRequest(res, error.message);
+        }
+        return ResponseService.serverError(res, defaultMessage);
+    }
 }
 
 export default BaseController;

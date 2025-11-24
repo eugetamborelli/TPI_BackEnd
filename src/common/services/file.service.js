@@ -6,15 +6,14 @@ class FileService {
         const filePath = this.getFilePath(fileName);
         
         try {
-            await fs.access(filePath).catch(async () => {
-                await fs.writeFile(filePath, JSON.stringify([], null, 2));
-        });
-
+            await fs.access(filePath);
+            // Si existe
             const data = await fs.readFile(filePath, "utf8");
             return JSON.parse(data || "[]");
         } catch (error) {
-            console.error(`Error reading ${fileName} file:`, error);
-            return [];
+            // Si no existe
+            await fs.writeFile(filePath, JSON.stringify([], null, 2));
+            return []; 
         }
     }
 
