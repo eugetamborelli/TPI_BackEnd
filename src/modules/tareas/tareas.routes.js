@@ -11,7 +11,6 @@ import {
     getTareasByPaciente,
 
     getTareasByFecha,
-    testFechas
 } from "./tareas.controller.js";
 
 const router = Router();
