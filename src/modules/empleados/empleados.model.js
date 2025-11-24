@@ -51,8 +51,15 @@ class EmpleadosModel extends BaseModel {
     }
   }
 
+  // Helper privado para eliminar la contraseña del objeto que retorna
+    _cleanPassword(empleado) {
+        if (!empleado) return null;
+        const { password, ...empleadoLimpio } = empleado;
+        return empleadoLimpio;
+    }
+
+  // *** CRUD ***
   async create(empleado) {
-    // Validar DNI único antes de crear
     await this._validateUniqueDni(empleado.dni);
 
     // Hashear password si se proporciona
@@ -60,14 +67,14 @@ class EmpleadosModel extends BaseModel {
       empleado.password = await hashPassword(empleado.password);
     }
 
-    return super.create(empleado);
+    const nuevoEmpleado = await super.create(empleado);
+    return this._cleanPassword(nuevoEmpleado);
   }
 
   async update(id, patch) {
     const empleado = await this.getById(id);
     if (!empleado) return null;
 
-    // Validar DNI único si se está actualizando
     if (patch.dni !== undefined) {
       this._validateUniqueDni(patch.dni, id);
     }
@@ -77,22 +84,33 @@ class EmpleadosModel extends BaseModel {
       patch.password = await hashPassword(patch.password);
     }
 
-    return super.update(id, patch);
+    const empleadoActualizado = await super.update(id, patch);
+    return this._cleanPassword(empleadoActualizado);
+  }
+
+  async remove(id) { 
+    return this.delete(id); 
   }
 
   async filterByRol(rol) {
-    return this.filterBy('rol', rol);
+    const empleados = await super.filterBy('rol', rol);
+    return empleados.map(this._cleanPassword);
   }
 
   async filterByArea(area) {
-    return this.filterBy('area', area);
+    const empleados = await super.filterBy('area', area);
+    return empleados.map(this._cleanPassword);
   }
 
   async getByDni(dni) {
-    return this.findBy('dni', String(dni))[0] || null;
+    const empleado = await super.findBy('dni', String(dni))[0] || null;
+    return this._cleanPassword(empleado);
   }
 
-  async remove(id) { return this.delete(id); }
+  async getById(id) {
+    const empleado = await super.getById(id);
+    return this._cleanPassword(empleado);
+  }
 }
 
 export default EmpleadosModel;
