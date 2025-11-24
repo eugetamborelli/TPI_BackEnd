@@ -63,10 +63,6 @@ export default class Paciente extends BaseModel {
         return await super.update(id, updates);
     }
 
-    async getAllPacientes() {
-        return await this.getAll();
-    }
-
     async getPacienteByDni(dni) {
         const paciente = await this._findByDni(dni);
         if (!paciente) {
@@ -75,38 +71,8 @@ export default class Paciente extends BaseModel {
         return paciente;
     }
 
-    async addPaciente(datosPaciente) {
-        return await this.create(datosPaciente);
-    }
-
-    async updatePaciente(dni, datosPaciente) {
-        const paciente = await this._findByDni(dni);
-        
-        if (!paciente) {
-            throw new Error(`Paciente con DNI ${dni} no encontrado`);
-        }
-
-        const {id: _ignoreId, dni: _ignoreDni, createdAt: _ignoreCreatedAt, ...allowedUpdates} = datosPaciente;
-
-        const updated = await this.update(paciente.id, allowedUpdates);
-        if (!updated) {
-            throw new Error("Error al actualizar el paciente");
-        }
-        return updated;
-    }
-
-    async deletePaciente(dni) {
-        const paciente = await this._findByDni(dni);
-        
-        if (!paciente) {
-            throw new Error(`Paciente con DNI ${dni} no encontrado`);
-        }
-
-        const deleted = await this.delete(paciente.id);
-        if (!deleted) {
-            throw new Error("Error al eliminar el paciente");
-        }
-
-        return paciente;
+    async getIdByDni(dni) {
+        const paciente = await this.getPacienteByDni(dni);
+        return paciente.id;
     }
 }

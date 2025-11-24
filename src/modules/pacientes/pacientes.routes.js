@@ -1,13 +1,5 @@
 import { Router } from "express";
-import {
-    renderDashboard,
-    renderNuevoPaciente,
-    renderEditarPaciente,
-    getPacientesListado,
-    addPaciente,
-    updatePaciente,
-    deletePaciente
-} from "./pacientes.controller.js";
+import pacientesController from "./pacientes.controller.js";
 //import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
@@ -16,14 +8,14 @@ const router = Router();
 //router.use(authenticate, requireEmpleado);
 
 //Vistas
-router.get("/", renderDashboard);
-router.get("/nuevo-paciente", renderNuevoPaciente)
-router.get("/editar/:dni", renderEditarPaciente);
+router.get("/", pacientesController.renderDashboard);
+router.get("/nuevo-paciente", pacientesController.renderNuevoPaciente)
+router.get("/editar/:dni", pacientesController.renderEditarPaciente);
 
 //CRUD
-router.get("/listado", getPacientesListado);
-router.post("/nuevo-paciente", addPaciente);
-router.patch("/editar/:dni", updatePaciente);
-router.delete("/:dni", deletePaciente);
+router.get("/listado", pacientesController.getPacientesListado);
+router.post("/nuevo-paciente", pacientesController.addPaciente);
+router.patch("/editar/:dni", pacientesController.updatePaciente);
+router.delete("/:dni", pacientesController.deletePaciente);
 
 export default router;
