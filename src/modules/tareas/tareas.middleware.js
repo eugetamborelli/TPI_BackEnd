@@ -16,13 +16,14 @@ export const validarId = (req, res, next) => {
 };
 
 export const validarCamposObligatorios = (req, res, next) => {
-    const { titulo, descripcion, estado, prioridad } = req.body;
+    const { titulo, descripcion, estado, prioridad, area } = req.body;
     const camposFaltantes = [];
 
     if (!titulo) camposFaltantes.push("titulo");
     if (!descripcion) camposFaltantes.push("descripcion");
     if (!estado) camposFaltantes.push("estado");
     if (!prioridad) camposFaltantes.push("prioridad");
+    if (!area) camposFaltantes.push("area");
 
     if (camposFaltantes.length > 0) {
         return res.status(400).json({ error: `Campos obligatorios faltantes: ${camposFaltantes.join(', ')}` });
@@ -31,9 +32,9 @@ export const validarCamposObligatorios = (req, res, next) => {
 };
 
 export const validarCamposOpcionales = (req, res, next) => {
-    const { titulo, descripcion, estado, prioridad } = req.body;
+    const { titulo, descripcion, estado, prioridad, area } = req.body;
 
-    if (!titulo && !descripcion && !estado && !prioridad) {
+    if (!titulo && !descripcion && !estado && !prioridad && !area) {
         return res.status(400).json({
             error: "Debe proporcionar al menos un campo para actualizar: titulo, descripcion, estado, prioridad"
         });
@@ -44,6 +45,9 @@ export const validarCamposOpcionales = (req, res, next) => {
     }
     if (descripcion !== undefined && (!descripcion || descripcion.trim() === "")) {
         return res.status(400).json({ error: "La descripción no puede estar vacía" });
+    }
+    if (area !== undefined && (!area || area.trim() === "")) {
+        return res.status(400).json({ error: "El área no puede estar vacía" });
     }
 
     next();
