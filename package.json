@@ -23,6 +23,7 @@
     "express": "4.19.2",
     "jsonwebtoken": "^9.0.2",
     "method-override": "^3.0.0",
+    "mongoose": "^8.20.1",
     "pug": "^3.0.3"
   },
   "devDependencies": {
