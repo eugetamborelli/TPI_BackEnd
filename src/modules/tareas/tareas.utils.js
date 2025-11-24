@@ -1,5 +1,13 @@
 export const ESTADOS_VALIDOS = ['pendiente', 'en_progreso', 'completada', 'cancelada'];
 export const PRIORIDADES_VALIDAS = ['baja', 'media', 'alta', 'urgente'];
+export const AREAS_VALIDAS = [
+    'gestion_de_turnos',
+    'atencion_medica',
+    'gestion_de_insumos',
+    'administrativo',
+    'facturacion',
+    'mantenimiento'
+];
 
 export const isDateInRange = (date, start, end) => {
     if (!date) return false;

@@ -1,8 +1,7 @@
 import BaseModel from "../../common/base/base.model.js";
 import ValidationService from "../../common/services/validation.service.js";
-import { normalizeDate, isDateInRange } from "./empleados.utils.js";
 import { hashPassword } from "../auth/password.utils.js";
-import { isEmpleadoEmail, validateEmailForUserType } from "../auth/email-domain.utils.js";
+import { isEmpleadoEmail } from "../auth/email-domain.utils.js";
 
 class EmpleadosModel extends BaseModel {
   constructor() {
@@ -15,10 +14,10 @@ class EmpleadosModel extends BaseModel {
   }
 
   // Helper privado para validar DNI único
-  _validateUniqueDni(dni, excludeId = null) {
+  async _validateUniqueDni(dni, excludeId = null) {
     if (!dni) return;
 
-    const empleados = this.getAll();
+    const empleados = await this.getAll();
     const dniNormalizado = this._normalizeDni(dni);
     const existing = empleados.find(e =>
       this._normalizeDni(e.dni) === dniNormalizado &&
@@ -52,23 +51,30 @@ class EmpleadosModel extends BaseModel {
     }
   }
 
+  // Helper privado para eliminar la contraseña del objeto que retorna
+    _cleanPassword(empleado) {
+        if (!empleado) return null;
+        const { password, ...empleadoLimpio } = empleado;
+        return empleadoLimpio;
+    }
+
+  // *** CRUD ***
   async create(empleado) {
-    // Validar DNI único antes de crear
-    this._validateUniqueDni(empleado.dni);
+    await this._validateUniqueDni(empleado.dni);
 
     // Hashear password si se proporciona
     if (empleado.password) {
       empleado.password = await hashPassword(empleado.password);
     }
 
-    return super.create(empleado);
+    const nuevoEmpleado = await super.create(empleado);
+    return this._cleanPassword(nuevoEmpleado);
   }
 
   async update(id, patch) {
-    const empleado = this.getById(id);
+    const empleado = await this.getById(id);
     if (!empleado) return null;
 
-    // Validar DNI único si se está actualizando
     if (patch.dni !== undefined) {
       this._validateUniqueDni(patch.dni, id);
     }
@@ -78,22 +84,33 @@ class EmpleadosModel extends BaseModel {
       patch.password = await hashPassword(patch.password);
     }
 
-    return super.update(id, patch);
+    const empleadoActualizado = await super.update(id, patch);
+    return this._cleanPassword(empleadoActualizado);
   }
 
-  filterByRol(rol) {
-    return this.filterBy('rol', rol);
+  async remove(id) { 
+    return this.delete(id); 
   }
 
-  filterByArea(area) {
-    return this.filterBy('area', area);
+  async filterByRol(rol) {
+    const empleados = await super.filterBy('rol', rol);
+    return empleados.map(this._cleanPassword);
   }
 
-  getByDni(dni) {
-    return this.findBy('dni', String(dni))[0] || null;
+  async filterByArea(area) {
+    const empleados = await super.filterBy('area', area);
+    return empleados.map(this._cleanPassword);
   }
 
-  remove(id) { return this.delete(id); }
+  async getByDni(dni) {
+    const empleado = await super.findBy('dni', String(dni))[0] || null;
+    return this._cleanPassword(empleado);
+  }
+
+  async getById(id) {
+    const empleado = await super.getById(id);
+    return this._cleanPassword(empleado);
+  }
 }
 
 export default EmpleadosModel;

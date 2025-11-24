@@ -30,15 +30,16 @@ export default class Paciente extends BaseModel {
     }
 
     // Helper privado para buscar paciente por DNI
-    _findByDni(dni) {
-        return this.findBy('dni', this._normalizeDni(dni))[0] || null;
+    async _findByDni(dni) {
+        const pacientes = await this.getAll();
+        return pacientes.find(p => Number(p.dni) === this._normalizeDni(dni)) || null;
     }
 
     // Helper privado para validar DNI único
-    _validateUniqueDni(dni, excludeId = null) {
+    async _validateUniqueDni(dni, excludeId = null) {
         if (!dni) return;
         
-        const pacientes = this.getAll();
+        const pacientes = await this.getAll();
         const existing = pacientes.find(p => 
             Number(p.dni) === this._normalizeDni(dni) && 
             (!excludeId || p.id !== excludeId)
@@ -49,66 +50,29 @@ export default class Paciente extends BaseModel {
         }
     }
 
-    create(datosPaciente) {
-        this._validateUniqueDni(datosPaciente.dni);
-        return super.create(datosPaciente);
+    async create(datosPaciente) {
+        await this._validateUniqueDni(datosPaciente.dni);
+        return await super.create(datosPaciente);
     }
 
-    update(id, updates) {
-        // Validar DNI único si se está actualizando
+    async update(id, updates) {
         if (updates.dni !== undefined) {
-            const paciente = this.getById(id);
-            if (paciente) {
-                this._validateUniqueDni(updates.dni, id);
-            }
+            await this._validateUniqueDni(updates.dni, id);
         }
-        return super.update(id, updates);
+
+        return await super.update(id, updates);
     }
 
-    getAllPacientes() {
-        return this.getAll();
-    }
-
-    getPacienteByDni(dni) {
-        const paciente = this._findByDni(dni);
+    async getPacienteByDni(dni) {
+        const paciente = await this._findByDni(dni);
         if (!paciente) {
             throw new Error(`Paciente con DNI ${dni} no encontrado`);
         }
         return paciente;
     }
 
-    addPaciente(datosPaciente) {
-        return this.create(datosPaciente);
-    }
-
-    updatePaciente(dni, datosPaciente) {
-        const paciente = this._findByDni(dni);
-        
-        if (!paciente) {
-            throw new Error(`Paciente con DNI ${dni} no encontrado`);
-        }
-
-        const {id: _ignoreId, dni: _ignoreDni, createdAt: _ignoreCreatedAt, ...allowedUpdates} = datosPaciente;
-
-        const updated = this.update(paciente.id, allowedUpdates);
-        if (!updated) {
-            throw new Error("Error al actualizar el paciente");
-        }
-        return updated;
-    }
-
-    deletePaciente(dni) {
-        const paciente = this._findByDni(dni);
-        
-        if (!paciente) {
-            throw new Error(`Paciente con DNI ${dni} no encontrado`);
-        }
-
-        const deleted = this.delete(paciente.id);
-        if (!deleted) {
-            throw new Error("Error al eliminar el paciente");
-        }
-
-        return paciente;
+    async getIdByDni(dni) {
+        const paciente = await this.getPacienteByDni(dni);
+        return paciente.id;
     }
 }

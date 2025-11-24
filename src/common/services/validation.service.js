@@ -1,10 +1,12 @@
+import { ValidationError } from '../errors/validation.error.js';
+
 class ValidationService {
     static validateRequiredFields(data, requiredFields, isUpdate = false) {
         if (isUpdate) return;
         
         const missingFields = requiredFields.filter(field => !data[field]);
         if (missingFields.length > 0) {
-            throw new Error(`Campos obligatorios faltantes: ${missingFields.join(', ')}`);
+            throw new ValidationError(`Campos obligatorios faltantes: ${missingFields.join(', ')}`);
         }
     }
 

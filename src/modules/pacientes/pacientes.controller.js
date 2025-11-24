@@ -1,100 +1,99 @@
-import Paciente from "./pacientes.model.js";
+import BaseController from "../../common/base/base.controller.js";
+import PacienteModel from "./pacientes.model.js";
 
-const pacienteModel = new Paciente();
-
-//Menú principal
-export const renderDashboard = (req, res) => {
-    res.render("pacientes/dashboard", {
-        titulo: "Gestión de Pacientes"
-    });
-}
-
-//Menú Listados
-export const getPacientesListado = (req, res) => {
-    try {
-        let pacientes = pacienteModel.getAllPacientes();
-        // No incluir password en los datos enviados a la vista
-        pacientes = pacientes.map(({ password, ...rest }) => rest);
-
-        const { dni } = req.query;
-        if (dni) {
-            try {
-                const paciente = pacienteModel.getPacienteByDni(dni);
-                pacientes = paciente ? [paciente] : [];
-            } catch (error) {
-                // Si no encuentra por DNI, mostrar lista vacía
-                pacientes = [];
-            }
-        }
-
-        res.render("pacientes/listado", { pacientes, dniBusqueda: dni || "" });
-    } catch (error) {
-        res.render("pacientes/listado", { pacientes: [], error: error.message });
+class PacientesController extends BaseController {
+    constructor() {
+        super(new PacienteModel());
     }
-}
 
-//Menú nuevo Paciente
-export const renderNuevoPaciente = (req, res) => {
-    res.render("pacientes/nuevoPaciente", {
-        titulo: "Alta de paciente",
-        formData: {}
-    });
-}
+    // --- Vistas ---
 
-export const addPaciente = (req, res) => {
-    try {
-        pacienteModel.addPaciente(req.body);
-        res.redirect("/pacientes/listado");
-    } catch (error) {
-        res.status(400).render("pacientes/nuevoPaciente", { 
-            error: error.message, 
-            formData: req.body || {},
-            titulo: "Alta de paciente"
-        });
-    }
-}
+    renderDashboard = (req, res) => {
+        res.render("pacientes/dashboard", { titulo: "Gestión de Pacientes" });
+    };
 
-//Menú actualizar paciente
-export const renderEditarPaciente = (req, res) => {
-    try {
-        const paciente = pacienteModel.getPacienteByDni(req.params.dni);
-        // No incluir password en los datos enviados a la vista
-        const { password, ...pacienteSinPassword } = paciente;
-        res.render("pacientes/editarPaciente", { paciente: pacienteSinPassword });
-    } catch (error) {
-        res.redirect("/pacientes/listado");
-    }
-}
+    renderNuevoPaciente = (req, res) => {
+        res.render("pacientes/nuevoPaciente", { titulo: "Alta de paciente", formData: {} });
+    };
 
-export const updatePaciente = (req, res) => {
-    try {
-        pacienteModel.updatePaciente(req.params.dni, req.body);
-        res.redirect("/pacientes/listado");
-    } catch (error) {
-        // En caso de error, necesitamos obtener el paciente original para el formulario
+    renderEditarPaciente = async (req, res) => {
         try {
-            const paciente = pacienteModel.getPacienteByDni(req.params.dni);
-            res.status(400).render("pacientes/editarPaciente", { 
-                error: error.message, 
-                paciente: { ...paciente, ...req.body }
-            });
-        } catch (getError) {
+            const paciente = await this.model.getPacienteByDni(req.params.dni);
+            res.render("pacientes/editarPaciente", { paciente });
+        } catch (error) {
             res.redirect("/pacientes/listado");
         }
-    }
+    };
+
+    getPacientesListado = async (req, res) => {
+        try {
+            const { dni } = req.query;
+            let pacientes;
+
+            if (dni) {
+                try {
+                    const paciente = await this.model.getPacienteByDni(dni);
+                    pacientes = [paciente];
+                } catch {
+                    pacientes = [];
+                }
+            } else {
+                pacientes = await this.model.getAll();
+            }
+
+            res.render("pacientes/listado", { pacientes, dniBusqueda: dni || "" });
+        } catch (error) {
+            res.render("pacientes/listado", { pacientes: [], error: error.message });
+        }
+    };
+
+    // --- CRUD Overrides  ---
+
+    addPaciente = async (req, res) => {
+        try {
+            await this.model.create(req.body);
+            res.redirect("/pacientes/listado");
+        } catch (error) {
+            res.status(400).render("pacientes/nuevoPaciente", {
+                error: error.message,
+                formData: req.body || {},
+                titulo: "Alta de paciente"
+            });
+        }
+    };
+
+    updatePaciente = async (req, res) => {
+        try {
+            const id = await this.model.getIdByDni(req.params.dni);
+            await this.model.update(id, req.body);
+            res.redirect("/pacientes/listado");
+        } catch (error) {
+            try {
+                const pacienteOriginal = await this.model.getPacienteByDni(req.params.dni);
+                res.status(400).render("pacientes/editarPaciente", {
+                    error: error.message,
+                    paciente: { ...pacienteOriginal, ...req.body }
+                });
+            } catch (fatalError) {
+                res.redirect("/pacientes/listado");
+            }
+        }
+    };
+
+    deletePaciente = async (req, res) => {
+        try {
+            const id = await this.model.getIdByDni(req.params.dni);
+            await this.model.delete(id);
+            res.redirect("/pacientes/listado");
+        } catch (error) {
+            const pacientes = await this.model.getAll();
+            res.render("pacientes/listado", { 
+                pacientes, 
+                error: "No se pudo eliminar: " + error.message,
+                dniBusqueda: "" 
+            });
+        }
+    };
 }
 
-export const deletePaciente = (req, res) => {
-    try {
-        pacienteModel.deletePaciente(req.params.dni);
-        res.redirect("/pacientes/listado");
-    } catch (error) {
-        // En caso de error al eliminar, redirigir con mensaje de error
-        const pacientes = pacienteModel.getAllPacientes();
-        res.render("pacientes/listado", { 
-            pacientes, 
-            error: error.message,
-            dniBusqueda: ""
-        });
-    }
-}
+export default new PacientesController();

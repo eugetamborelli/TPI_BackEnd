@@ -1,0 +1,80 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Tareas
+        br
+        ul
+            li
+                a(href="/tareas/listado") Listado de Tareas
+            li 
+                a(href="/tareas/nuevaTarea") Alta de Tareas
+            li
+                a(href="/tareas") Volver al Menú de Gestión de Tareas
+        br
+
+        h3 Alta de nueva tarea
+
+        if error
+            p(style="color:red")= error
+
+        form(action="/tareas" method="POST")
+            //--- Campos Obligatorios ---
+            div
+                label(for="titulo") Título: *
+                input(type="text" name="titulo" required value=formData.titulo || '' placeholder="Ej: Llamar a paciente X para confirmar turno")
+
+            div
+                label(for="descripcion") Descripción: *
+                textarea(name="descripcion" required placeholder="Detalles de la tarea...")= formData.descripcion || ''
+
+            div
+                label(for="area") Área: *
+                select(name="area" required)
+                    option(value="") Seleccione un área
+                    each areaVal in areas
+                        option(value=areaVal, selected=(formData.area === areaVal))= areaVal.replace(/_/g, ' ').toUpperCase()
+
+            div
+                label(for="estado") Estado: *
+                select(name="estado" required)
+                    option(value="") Seleccione un estado
+                    each estadoVal in estados
+                        option(value=estadoVal, selected=(formData.estado === estadoVal))= estadoVal.replace(/_/g, ' ').toUpperCase()
+
+            div
+                label(for="prioridad") Prioridad: *
+                select(name="prioridad" required)
+                    option(value="") Seleccione una prioridad
+                    each prioVal in prioridades
+                        option(value=prioVal, selected=(formData.prioridad === prioVal))= prioVal.toUpperCase()
+            
+            //--- Campos Opcionales ---
+            div
+                label(for="empleadoId") Empleado Asignado (ID):
+                input(type="number" name="empleadoId" value=formData.empleadoId || '' min="1" placeholder="ID del empleado")
+
+            div
+                label(for="pacienteId") Paciente Relacionado (ID):
+                input(type="number" name="pacienteId" value=formData.pacienteId || '' min="1" placeholder="ID del paciente")
+
+            div
+                label(for="proveedorId") Proveedor Relacionado (ID):
+                input(type="number" name="proveedorId" value=formData.proveedorId || '' min="1" placeholder="ID del proveedor")
+
+            div
+                label(for="fechaInicio") Fecha de Inicio (Planificada):
+                input(type="date" name="fechaInicio" value=formData.fechaInicio || '')
+
+            div
+                label(for="fechaFin") Fecha de Finalización (Límite):
+                input(type="date" name="fechaFin" value=formData.fechaFin || '')
+
+            div
+                label(for="observaciones") Observaciones:
+                textarea(name="observaciones" placeholder="Notas adicionales...")= formData.observaciones || ''
+
+            br
+            button(type="submit") Guardar Tarea

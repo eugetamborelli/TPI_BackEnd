@@ -12,24 +12,24 @@ class BaseModel {
         throw new Error("validateData debe ser implementado por la clase hija");
     }
 
-    getAll() {
-        return FileService.readJsonFile(this.fileName);
+    async getAll() {
+        return await FileService.readJsonFile(this.fileName);
     }
 
-    getById(id) {
-        const data = this.getAll();
+    async getById(id) {
+        const data = await this.getAll();
         return data.find(item => item.id === Number(id)) || null;
     }
 
-    findBy(field, value) {
-        const data = this.getAll();
+    async findBy(field, value) {
+        const data = await this.getAll();
         return data.filter(item => item[field] === value);
     }
 
-    create(itemData) {
+    async create(itemData) {
         this.validateData(itemData, false);
 
-        const data = this.getAll();
+        const data = await this.getAll();
         const id = FileService.getNextId(data);
 
         const now = new Date().toISOString();
@@ -42,7 +42,7 @@ class BaseModel {
 
         data.push(newItem);
         
-        const saved = FileService.writeJsonFile(this.fileName, data);
+        const saved = await FileService.writeJsonFile(this.fileName, data);
         if (!saved) {
             throw new Error("Error al guardar el registro");
         }
@@ -50,10 +50,10 @@ class BaseModel {
         return newItem;
     }
 
-    update(id, updates) {
+    async update(id, updates) {
         this.validateData(updates, true);
 
-        const data = this.getAll();
+        const data = await this.getAll();
         const index = data.findIndex(item => item.id === Number(id));
         
         if (index === -1) return null;
@@ -66,7 +66,7 @@ class BaseModel {
             updatedAt: new Date().toISOString()
         };
 
-        const saved = FileService.writeJsonFile(this.fileName, data);
+        const saved = await FileService.writeJsonFile(this.fileName, data);
         if (!saved) {
             throw new Error("Error al actualizar el registro");
         }
@@ -74,14 +74,14 @@ class BaseModel {
         return data[index];
     }
 
-    delete(id) {
-        const data = this.getAll();
+    async delete(id) {
+        const data = await this.getAll();
         const filteredData = data.filter(item => item.id !== Number(id));
         
         const wasDeleted = filteredData.length !== data.length;
         
         if (wasDeleted) {
-            const saved = FileService.writeJsonFile(this.fileName, filteredData);
+            const saved = await FileService.writeJsonFile(this.fileName, filteredData);
             if (!saved) {
                 throw new Error("Error al eliminar el registro");
             }
@@ -90,8 +90,8 @@ class BaseModel {
         return wasDeleted;
     }
 
-    filterBy(field, value) {
-        return this.getAll().filter(item => {
+    async filterBy(field, value) {
+        return await this.getAll().filter(item => {
             const itemValue = item[field];
             if (typeof itemValue === 'string' && typeof value === 'string') {
                 return itemValue.toLowerCase() === value.toLowerCase();

@@ -26,4 +26,15 @@ app.set('views', path.join(__dirname, 'views'));
 // Rutas
 app.use("/", routes);
 
+// Middleware para manejar 404
+app.use((req, res, next) => {
+    res.status(404).send("Lo sentimos, no encontramos esa página.");
+});
+
+// Middleware de manejo de errores globales
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).send('¡Algo salió mal en el servidor!');
+});
+
 export default app;

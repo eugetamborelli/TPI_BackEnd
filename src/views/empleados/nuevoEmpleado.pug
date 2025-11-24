@@ -10,7 +10,7 @@ html
       li
         a(href="/empleados/listado") Listado de Empleados
       li
-        a(href="/empleados/nuevo-empleado") Alta de empleados
+        a(href="/empleados/nuevoEmpleado") Alta de empleados
       li
         a(href="/empleados") Volver al Menú de Gestión de Empleados
     br
@@ -20,7 +20,7 @@ html
     if error
       p(style="color:red")= error
 
-    form(action="/empleados/nuevo-empleado" method="POST")
+    form(action="/empleados/nuevoEmpleado" method="POST")
       div
         label(for="nombre") Nombre:
         input(type="text" name="nombre" required value=(formData && formData.nombre))
@@ -33,7 +33,7 @@ html
         label(for="dni") DNI:
         input(type="text" name="dni" required value=(formData && formData.dni))
 
-      // Rol con select
+      //- Rol con select
       div
         label(for="rol") Rol:
         select(name="rol" required)
@@ -41,7 +41,7 @@ html
           each r in ROLES
             option(value=r selected=(formData && formData.rol===r))= r
 
-      // Área con select
+      //- Área con select
       div
         label(for="area") Área:
         select(name="area" required)

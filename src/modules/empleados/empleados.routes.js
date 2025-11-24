@@ -1,23 +1,19 @@
 import { Router } from "express";
-import {
-  renderDashboard,
-  renderNuevoEmpleado,
-  renderEditarEmpleado,
-  getEmpleadosListado,
-  addEmpleado,
-  updateEmpleado,
-  deleteEmpleado
-} from "./empleados.controller.js";
+import EmpleadosController from "./empleados.controller.js";
+//import { authenticate, requireEmpleado } from "../auth/auth.middleware.js";
 
 const router = Router();
 
-// Vistas + CRUD (orden específico; NADA de "/:id" aquí)
-router.get("/", renderDashboard);
-router.get("/listado", getEmpleadosListado);
-router.get("/nuevo-empleado", renderNuevoEmpleado);
-router.post("/nuevo-empleado", addEmpleado);
-router.get("/editar/:id", renderEditarEmpleado);
-router.patch("/editar/:id", updateEmpleado);
-router.delete("/:id", deleteEmpleado);
+// Todas las rutas de empleados requieren autenticación y ser empleado
+//router.use(authenticate, requireEmpleado);
+
+// Vistas + CRUD
+router.get("/", EmpleadosController.renderDashboard);
+router.get("/listado", EmpleadosController.getEmpleadosListado);
+router.get("/nuevoEmpleado", EmpleadosController.renderNuevoEmpleado);
+router.post("/nuevoEmpleado", EmpleadosController.addEmpleado);
+router.get("/editar/:id", EmpleadosController.renderEditarEmpleado);
+router.patch("/editar/:id", EmpleadosController.updateEmpleado);
+router.delete("/:id", EmpleadosController.deleteEmpleado);
 
 export default router;
