@@ -6,11 +6,11 @@
     "dni": "32123456",
     "rol": "recepcionista",
     "area": "Administración de Turnos",
-    "updatedAt": "2025-10-29T20:54:50.751Z",
-    "telefono": "1144455566",
-    "email": "carla.mendez@clinicaintegral.com",
+    "updatedAt": "2025-11-24T07:23:20.876Z",
+    "telefono": "1144455577",
+    "email": "carla.mendez@saludintegral.com",
     "fechaAlta": "2025-10-15",
-    "activo": "on"
+    "activo": true
   },
   {
     "id": 103,

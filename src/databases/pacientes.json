@@ -7,12 +7,12 @@
     "fechaNacimiento": "1985-04-20",
     "telefono": "1123456789",
     "email": "juan.perez@example.com",
-    "direccion": "Patos 568, Buenos Aires",
+    "direccion": "Patos 569, Buenos Aires",
     "obraSocial": "OSDE",
     "fechaAlta": "2023-01-15",
     "historiaClinicaId": 1,
     "createdAt": "2025-09-18T12:00:00.000Z",
-    "updatedAt": "2025-09-21T20:15:38.036Z",
+    "updatedAt": "2025-11-24T00:31:00.053Z",
     "_method": "PATCH",
     "password": "$2b$10$6qzhJexnPF4V1RrQBUsJWumoWjaBjFGJLlz3UXUD7SyHyPFx7bgcO"
   },
@@ -39,10 +39,10 @@
     "fechaNacimiento": "1992-03-15",
     "telefono": "1145678901",
     "email": "ana.rodriguez@email.com",
-    "direccion": "San Martin 456",
+    "direccion": "San Martin 457",
     "obraSocial": "Galeno",
     "fechaAlta": "2025-11-12",
     "createdAt": "2025-11-12T20:37:33.186Z",
-    "updatedAt": "2025-11-12T20:37:33.186Z"
+    "updatedAt": "2025-11-24T06:37:17.698Z"
   }
 ]

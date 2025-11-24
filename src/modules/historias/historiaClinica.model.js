@@ -12,12 +12,10 @@ class HistoriaClinicaModel extends BaseModel {
         const requiredFields = ["pacienteId"];
         ValidationService.validateRequiredFields(historia, requiredFields, isUpdate);
 
-        // Validar que pacienteId sea un número válido
         if (historia.pacienteId && isNaN(Number(historia.pacienteId))) {
             throw new Error("El ID del paciente debe ser un número válido");
         }
 
-        // Validar fecha de creación si se proporciona
         if (historia.fechaCreacion) {
             ValidationService.validateDate(historia.fechaCreacion, false);
         }
@@ -39,18 +37,17 @@ class HistoriaClinicaModel extends BaseModel {
     }
 
     // Helper privado para validar que el paciente existe
-    _validatePacienteExists(pacienteId) {
-        const paciente = this.pacienteModel.getById(pacienteId);
+    async _validatePacienteExists(pacienteId) {
+        const paciente = await this.pacienteModel.getById(pacienteId);
         
         if (!paciente) {
             throw new Error(`No existe un paciente con ID ${pacienteId}`);
         }
     }
 
-    create(historia) {
-        // Validar que el paciente existe
+    async create(historia) {
         if (historia.pacienteId) {
-            this._validatePacienteExists(historia.pacienteId);
+            await this._validatePacienteExists(historia.pacienteId);
         }
 
         // Establecer fecha de creación si no se proporciona
@@ -69,21 +66,35 @@ class HistoriaClinicaModel extends BaseModel {
             historia.antecedentes = {};
         }
 
-        return super.create(historia);
+        return await super.create(historia);
     }
 
     // Obtener historias clínicas por paciente
-    getByPacienteId(pacienteId) {
-        return this.findBy('pacienteId', Number(pacienteId));
+    async getByPacienteId(pacienteId) {
+        return await this.findBy('pacienteId', Number(pacienteId));
     }
 
     // Obtener una historia clínica por paciente (la más reciente o única)
-    getByPacienteIdSingle(pacienteId) {
-        const historias = this.getByPacienteId(pacienteId);
-        // Retornar la más reciente o la única
+    async getByPacienteIdSingle(pacienteId) {
+        const historias = await this.getByPacienteId(pacienteId);
         return historias.length > 0 ? historias[historias.length - 1] : null;
+    }
+
+    async getAllHistorias() {
+        return await this.getAll();
+    }
+
+    async getHistoriaById(id) {
+        return await this.getById(id);
+    }
+
+    async updateHistoria(id, updates) {
+        return await this.update(id, updates);
+    }
+
+    async deleteHistoria(id) {
+        return await this.delete(id);
     }
 }
 
 export default HistoriaClinicaModel;
-
