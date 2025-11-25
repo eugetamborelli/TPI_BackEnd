@@ -56,8 +56,7 @@ html
                     option(value="") Seleccione una prioridad
                     each prioVal in prioridades
                         - const selectedPrioridad = getValue('prioridad')
-                        option(value=prioVal, selected=(selectedPrioridad === prioVal))
-                        = prioVal.toUpperCase()
+                        option(value=prioVal, selected=(selectedPrioridad === prioVal))= prioVal.toUpperCase()
             
             //- Campos Opcionales
             

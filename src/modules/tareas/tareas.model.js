@@ -71,7 +71,14 @@ export const buscarTareas = async (filtros = {}) => {
         const fechaQuery = {};
 
         if (inicio) {
-            const fechaInicio = new Date(inicio);
+            // Parsear fecha en formato YYYY-MM-DD y crear inicio del día en hora local
+            const fechaInicioStr = String(inicio).trim();
+            if (!fechaInicioStr) {
+                throw new Error('Fecha de inicio no puede estar vacía.');
+            }
+            
+            // Si viene en formato YYYY-MM-DD, crear fecha al inicio del día en hora local
+            const fechaInicio = new Date(fechaInicioStr + 'T00:00:00');
             if (isNaN(fechaInicio.getTime())) {
                 throw new Error('Fecha de inicio inválida. Debe ser una fecha válida.');
             }
@@ -79,13 +86,18 @@ export const buscarTareas = async (filtros = {}) => {
         }
 
         if (fin) {
-            const fechaFin = new Date(fin);
+            // Parsear fecha en formato YYYY-MM-DD y crear final del día en hora local
+            const fechaFinStr = String(fin).trim();
+            if (!fechaFinStr) {
+                throw new Error('Fecha de fin no puede estar vacía.');
+            }
+            
+            // Crear fecha al final del día (23:59:59.999) en hora local
+            const fechaFin = new Date(fechaFinStr + 'T23:59:59.999');
             if (isNaN(fechaFin.getTime())) {
                 throw new Error('Fecha de fin inválida. Debe ser una fecha válida.');
             }
-            let fechaFinBusqueda = new Date(fechaFin);
-            fechaFinBusqueda.setDate(fechaFinBusqueda.getDate() + 1);
-            fechaQuery.$lt = fechaFinBusqueda; 
+            fechaQuery.$lte = fechaFin; 
         }
 
         if (Object.keys(fechaQuery).length > 0) {

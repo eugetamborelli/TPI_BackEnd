@@ -80,11 +80,12 @@ class TareasController {
 
         } catch (e) {
             console.error("Error en renderListarTareas:", e);
-            res.status(500).render("tareas/listarTareas", {
+            // Preservar los filtros de búsqueda para que el usuario pueda corregirlos
+            res.status(400).render("tareas/listarTareas", {
                 titulo: "Error en el Listado",
                 tareas: [],
-                error: "Error al cargar las tareas: " + e.message,
-                busqueda: {},
+                error: "Error al buscar las tareas: " + e.message,
+                busqueda: busqueda, // Mantener los filtros para que el usuario vea qué envió
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
