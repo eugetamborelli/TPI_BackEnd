@@ -62,7 +62,8 @@ class TareasController {
     renderListarTareas = async (req, res) => {
         let tareas = [];
         let error = null;
-        let busqueda = req.query || {};
+        // Separar los parámetros de búsqueda de los mensajes
+        const { msg, error: queryError, ...busqueda } = req.query || {};
 
         try {            
             tareas = await buscarTareas(busqueda);
@@ -73,9 +74,9 @@ class TareasController {
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
-                error: req.query.error || null,
+                error: queryError || null,
                 busqueda,
-                successMsg: req.query.msg || null
+                successMsg: msg || null
             });
 
         } catch (e) {
