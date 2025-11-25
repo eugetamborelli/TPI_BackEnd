@@ -76,7 +76,7 @@ MONGODB_URI=mongodb://localhost:27017/tpi_back
 # O para MongoDB Atlas:
 # MONGODB_URI=mongodb+srv://usuario:password@cluster.mongodb.net/nombre_db
 
-# JWT Secret (genera uno seguro para producción)
+# JWT Secret
 JWT_SECRET=tu_secreto_jwt_super_seguro_aqui
 ```
 
@@ -97,7 +97,7 @@ El servidor estará disponible en: `http://localhost:3000`
 ## 📚 Scripts Disponibles
 
 ```bash
-npm run dev    # Inicia el servidor en modo desarrollo con nodemon
+npm run dev    # Inicia el servidor en modo desarrollo
 npm start      # Inicia el servidor en modo producción
 npm test       # Ejecuta tests (pendiente de implementar)
 ```
