@@ -23,7 +23,7 @@ html
 
         // Si se recibe un mensaje de éxito en la query
         if busqueda.msg
-            p(style="color:green; font-weight:bold;")= query.msg
+            p(style="color:green; font-weight:bold;")= busqueda.msg
 
         //--- Formulario de Filtros 
         h3 Filtrar Tareas
@@ -92,7 +92,6 @@ html
             table(border="1" cellpadding="5" cellspacing="0")
                 thead
                     tr
-                        th ID
                         th Título
                         th Área
                         th Estado
@@ -105,21 +104,21 @@ html
                 tbody
                     each tarea in tareas
                         tr
-                            td= tarea.id
                             td= tarea.titulo
                             td= tarea.area.replace(/_/g, ' ').toUpperCase()
                             td= tarea.estado.replace(/_/g, ' ').toUpperCase()
                             td= tarea.prioridad.toUpperCase()
                             td= tarea.empleadoId || '-'
                             td= tarea.pacienteId || '-'
-                            td= tarea.fechaInicio || '-'
-                            td= tarea.fechaFin || '-'
+                            td= formatDate(tarea.fechaInicio) || '-'
+                            td= formatDate(tarea.fechaFin) || '-'
                             td
                                 // Botón para Editar
-                                a(href=`/tareas/editar/${tarea.id}`)
+                                a(href=`/tareas/editar/${tarea._id}`)
                                     button(type="button") Editar
                                 // Botón para Eliminar
-                                form(action=`/tareas/${tarea.id}?_method=DELETE` method="POST" style="display:inline;")
+                                form(action=`/tareas/${tarea._id}` method="POST" style="display:inline;")
+                                    input(type="hidden" name="_method" value="DELETE")
                                     button(type="submit", onclick="return confirm('¿Está seguro de eliminar esta tarea?');") Eliminar
         else
             if Object.keys(busqueda).length > 0

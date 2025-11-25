@@ -15,12 +15,13 @@ html
                 a(href="/tareas") Volver al Menú de Gestión de Tareas
         br
 
-        h3 Edición de Tarea ID: #{tarea.id} 
+        h3 Edición de Tarea ID: #{tarea._id} 
 
         if error
             p(style="color:red")= error
 
-        form(action=`/tareas/${tarea.id}?_method=PATCH` method="POST")
+        form(action=`/tareas/${tarea._id}` method="POST")
+            input(type="hidden" name="_method" value="PATCH")
             
             - const getValue = (field) => formData[field] !== undefined ? formData[field] : (tarea[field] || '')
 

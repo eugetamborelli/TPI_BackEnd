@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import methodOverride from "method-override";
 import cors from "cors";
 import routes from "./routes/index.js";
+import { formatDateDDMMYYYY } from './common/utils/date.utils.js';
 
 const app = express();
 
@@ -22,6 +23,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Configuración de vistas
 app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, 'views'));
+
+// Middleware para formato de fecha a las vistas
+app.use((req, res, next) => {
+    res.locals.formatDate = formatDateDDMMYYYY; 
+    next();
+});
 
 // Rutas
 app.use("/", routes);

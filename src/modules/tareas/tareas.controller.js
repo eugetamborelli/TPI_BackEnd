@@ -1,18 +1,15 @@
-import BaseController from "../../common/base/base.controller.js";
+import { 
+    getTareaById, 
+    createTarea, 
+    updateTarea, 
+    deleteTarea, 
+    buscarTareas, 
+} from "./tareas.model.js";
 import ResponseService from "../../common/services/response.service.js";
-import TareasModel from "./tareas.model.js";
-import EmpleadoModel from "../empleados/empleados.model.js";
 import { ESTADOS_VALIDOS, PRIORIDADES_VALIDAS, AREAS_VALIDAS } from "./tareas.utils.js";
 
-const model = new TareasModel();
-const empleadoModel = new EmpleadoModel();
-
-class TareasController extends BaseController {
-    constructor() {
-        super(model);
-    }
-
-    // --- Vistas ---
+class TareasController {
+    // *** Vistas ***
 
     renderDashboard = (req, res) => {
         res.render("tareas/dashboard", {
@@ -20,15 +17,14 @@ class TareasController extends BaseController {
         });
     };
 
-    renderNuevaTarea = async (req, res) => {
+    renderNuevaTarea = (req, res) => {
         try {
-            
             res.render("tareas/nuevaTarea", {
                 titulo: "Alta de Nueva Tarea",
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
-                error: null,
+                error: req.query.error || null,
                 formData: req.query
             });
         } catch (error) {
@@ -41,14 +37,14 @@ class TareasController extends BaseController {
         const tareaId = req.params.id; 
 
         try {
-            const tarea = await model.getById(Number(tareaId));
+            const tarea = await getTareaById(tareaId); 
             
             if (!tarea) {
                 return res.status(404).redirect("/tareas/listado?error=Tarea no encontrada.");
             }
             
             res.render("tareas/editarTarea", {
-                titulo: `Editar Tarea #${tarea.id}`,
+                titulo: `Editar Tarea #${tarea._id}`, 
                 tarea,
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
@@ -69,7 +65,7 @@ class TareasController extends BaseController {
         let busqueda = req.query || {};
 
         try {            
-            tareas = await model.buscar(busqueda);
+            tareas = await buscarTareas(busqueda);
             
             res.render("tareas/listarTareas", {
                 titulo: "Listado y Búsqueda de Tareas",
@@ -97,20 +93,25 @@ class TareasController extends BaseController {
 
     addTarea = async (req, res) => {
         try {
-            const nuevaTarea = await model.create(req.body); 
+            const nuevaTarea = await createTarea(req.body); 
             
-            res.redirect(`/tareas/listado?msg=Tarea%20${nuevaTarea.id}%20creada%20con%20éxito.`);
+            res.redirect(`/tareas/listado?msg=Tarea%20${nuevaTarea._id}%20creada%20con%20éxito.`);
             
         } catch (error) {
             console.error("Error al crear tarea:", error);
             
+            let errorMessage = error.message;
+
+            if (error.name === 'ValidationError') {
+                errorMessage = Object.values(error.errors).map(val => val.message).join(' | ');
+            }
+
             res.status(400).render("tareas/nuevaTarea", {
                 titulo: "Alta de Nueva Tarea",
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
-                areas: AREAS_VALIDAS,
-                error: error.message,
+                error: errorMessage,
                 formData: req.body
             });
         }
@@ -120,14 +121,23 @@ class TareasController extends BaseController {
         const tareaId = req.params.id;
         
         try {
-            const tareaActualizada = await model.update(Number(tareaId), req.body);
+            const tareaActualizada = await updateTarea(tareaId, req.body);
+            
+            if (!tareaActualizada) {
+                return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaId} no encontrada para actualizar.`);
+            }
 
-            res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada.id}%20actualizada%20con%20éxito.`);
+            res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada._id}%20actualizada%20con%20éxito.`);
 
         } catch (error) {
             console.error("Error al editar tarea:", error);
             
-            const tareaOriginal = await model.getById(Number(tareaId));
+            let errorMessage = error.message;
+            if (error.name === 'ValidationError') {
+                errorMessage = Object.values(error.errors).map(val => val.message).join(' | ');
+            }
+
+            const tareaOriginal = await getTareaById(tareaId);
 
             res.status(400).render("tareas/editarTarea", {
                 titulo: `Editar Tarea #${tareaId}`,
@@ -135,31 +145,92 @@ class TareasController extends BaseController {
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
-                error: error.message,
+                error: errorMessage,
                 formData: req.body 
             });
         }
     };
 
-    removeTarea = this.delete;
-
-    // --- Filtros API ---
-
-    getTareas = this.getAll;
-    getTarea = this.getById;
-    addTarea = this.create;
-    editTarea = this.update;
-    removeTarea = this.delete;
-
-    getTareasByEstado = this.createFilterHandler('estado', 'estado');
-    getTareasByPrioridad = this.createFilterHandler('prioridad', 'prioridad');
-    getTareasByEmpleado = this.createFilterHandler('empleadoId', 'empleadoId');
-    getTareasByPaciente = this.createFilterHandler('pacienteId', 'pacienteId');
-
-    getTareasByFecha = (req, res) => {
+    removeTarea = async (req, res) => {
+        const tareaId = req.params.id; 
         try {
-            const { inicio, fin, tipo = 'inicio' } = req.query;
-            const tareas = model.filtrarPorFecha(inicio, fin, tipo);
+            const wasDeleted = await deleteTarea(tareaId);
+
+            if (wasDeleted) {
+                return res.redirect(`/tareas/listado?msg=Tarea%20${tareaId}%20eliminada%20con%20éxito.`);
+            } else {
+                return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaId} no encontrada para eliminar.`);
+            }
+        } catch (error) {
+            console.error("Error al eliminar tarea:", error);
+            return res.status(500).redirect(`/tareas/listado?error=Error al intentar eliminar la tarea: ${error.message}`);
+        }
+    };
+
+    // *** Filtros API ***
+
+    getTareas = async (req, res) => {
+        try {
+            const tareas = await buscarTareas(req.query);
+            ResponseService.success(res, tareas);
+        } catch (error) {
+            console.error("Error en getTareas API:", error);
+            ResponseService.serverError(res, "Error al obtener las tareas.");
+        }
+    };
+    
+    getTarea = async (req, res) => {
+        try {
+            const tarea = await getTareaById(req.params.id);
+            if (!tarea) return ResponseService.notFound(res, "Tarea no encontrada.");
+            ResponseService.success(res, tarea);
+        } catch (error) {
+            console.error("Error en getTarea API:", error);
+            ResponseService.serverError(res, "Error al obtener la tarea por ID.");
+        }
+    };
+
+    create = async (req, res) => {
+        try {
+            const nuevaTarea = await createTarea(req.body);
+            ResponseService.success(res, nuevaTarea, 201);
+        } catch (error) {
+            let message = error.message;
+            if (error.name === 'ValidationError') {
+                message = Object.values(error.errors).map(val => val.message).join(' | ');
+            }
+            ResponseService.badRequest(res, message);
+        }
+    };
+
+    update = async (req, res) => {
+        try {
+            const updatedTarea = await updateTarea(req.params.id, req.body);
+            if (!updatedTarea) return ResponseService.notFound(res, "Tarea no encontrada para actualizar.");
+            ResponseService.success(res, updatedTarea);
+        } catch (error) {
+            let message = error.message;
+            if (error.name === 'ValidationError') {
+                message = Object.values(error.errors).map(val => val.message).join(' | ');
+            }
+            ResponseService.badRequest(res, message);
+        }
+    };
+
+    delete = async (req, res) => {
+        try {
+            const wasDeleted = await deleteTarea(req.params.id);
+            if (!wasDeleted) return ResponseService.notFound(res, "Tarea no encontrada para eliminar.");
+            ResponseService.success(res, { message: "Tarea eliminada exitosamente." }, 204); // 204 No Content
+        } catch (error) {
+            ResponseService.serverError(res, "Error al eliminar la tarea.");
+        }
+    };
+    
+
+    getTareasByFecha = async (req, res) => {
+        try {
+            const tareas = await buscarTareas(req.query);
             
             if (tareas.length === 0) {
                 return ResponseService.success(res, { 
@@ -170,6 +241,7 @@ class TareasController extends BaseController {
             
             ResponseService.success(res, tareas);
         } catch (error) {
+            console.error("Error en getTareasByFecha:", error);
             ResponseService.serverError(res, "Error al filtrar por fecha");
         }
     };
