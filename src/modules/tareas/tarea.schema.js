@@ -57,7 +57,7 @@ const TareaSchema = new Schema({
         type: String,
     },
     proveedorId: { 
-        type: String, // Asumiendo que es opcional y se guarda como String
+        type: String,
     },
     observaciones: { 
         type: String,

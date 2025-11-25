@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import TareaMongooseModel from './tarea.schema.js'; 
 
 // *** CRUD ***
@@ -48,12 +49,20 @@ export const buscarTareas = async (filtros = {}) => {
     const query = {};
     const { estado, prioridad, empleadoId, pacienteId, inicio, fin, tipo = 'inicio' } = filtros;
 
-    if (estado) query.estado = estado.toLowerCase(); 
-    if (prioridad) query.prioridad = prioridad.toLowerCase();
+    // Validar y normalizar estado
+    if (estado) {
+        const estadoNormalizado = estado.toLowerCase();
+        query.estado = estadoNormalizado;
+    }
+    if (prioridad) {
+        const prioridadNormalizada = prioridad.toLowerCase();
+        query.prioridad = prioridadNormalizada;
+    }
     
     if (empleadoId) query.empleadoId = empleadoId;
     if (pacienteId) query.pacienteId = pacienteId; 
 
+    // Validar y procesar fechas
     if (inicio || fin) {
         let fechaCampo = 'fechaInicio';
         if (tipo === 'creacion') fechaCampo = 'createdAt';
@@ -62,11 +71,19 @@ export const buscarTareas = async (filtros = {}) => {
         const fechaQuery = {};
 
         if (inicio) {
-            fechaQuery.$gte = new Date(inicio);
+            const fechaInicio = new Date(inicio);
+            if (isNaN(fechaInicio.getTime())) {
+                throw new Error('Fecha de inicio inválida. Debe ser una fecha válida.');
+            }
+            fechaQuery.$gte = fechaInicio;
         }
 
         if (fin) {
-            let fechaFinBusqueda = new Date(fin);
+            const fechaFin = new Date(fin);
+            if (isNaN(fechaFin.getTime())) {
+                throw new Error('Fecha de fin inválida. Debe ser una fecha válida.');
+            }
+            let fechaFinBusqueda = new Date(fechaFin);
             fechaFinBusqueda.setDate(fechaFinBusqueda.getDate() + 1);
             fechaQuery.$lt = fechaFinBusqueda; 
         }
@@ -80,18 +97,11 @@ export const buscarTareas = async (filtros = {}) => {
         const tareas = await TareaMongooseModel.find(query).lean();
         return tareas;
     } catch (error) {
-        throw new Error('Error al ejecutar la búsqueda de tareas.');
+        // Preservar el error original si es un error de validación que lanzamos
+        if (error.message.includes('inválido') || error.message.includes('inválida')) {
+            throw error;
+        }
+        // Para errores de base de datos, lanzar con más contexto
+        throw new Error(`Error al ejecutar la búsqueda de tareas: ${error.message}`);
     }
 };
-
-// *** Mapeo de Funciones REVISAR SI VA
-
-/* export const getAllTareas = async () => buscarTareas({}); 
-export const obtenerTodas = getAllTareas;
-
-export const obtenerPorId = getTareaById;
-export const crear = createTarea;
-export const actualizar = updateTarea;
-export const eliminar = deleteTarea;
-
-export const buscar = buscarTareas;  */

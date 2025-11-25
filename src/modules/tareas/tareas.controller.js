@@ -128,7 +128,7 @@ class TareasController {
                 return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaId} no encontrada para actualizar.`);
             }
 
-            res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada._id}%20actualizada%20con%20éxito.`);
+            return res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada._id}%20actualizada%20con%20éxito.`);
 
         } catch (error) {
             console.error("Error al editar tarea:", error);
@@ -138,11 +138,18 @@ class TareasController {
                 errorMessage = Object.values(error.errors).map(val => val.message).join(' | ');
             }
 
-            const tareaOriginal = await getTareaById(tareaId);
+            // Intentar obtener la tarea original, pero manejar errores si falla
+            let tareaOriginal = null;
+            try {
+                tareaOriginal = await getTareaById(tareaId);
+            } catch (getError) {
+                console.error("Error al obtener tarea original para edición:", getError);
+                // Si no se puede obtener, usar null y el formData como fallback
+            }
 
-            res.status(400).render("tareas/editarTarea", {
+            return res.status(400).render("tareas/editarTarea", {
                 titulo: `Editar Tarea #${tareaId}`,
-                tarea: tareaOriginal, 
+                tarea: tareaOriginal || { _id: tareaId, ...req.body }, 
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
@@ -222,9 +229,11 @@ class TareasController {
         try {
             const wasDeleted = await deleteTarea(req.params.id);
             if (!wasDeleted) return ResponseService.notFound(res, "Tarea no encontrada para eliminar.");
-            ResponseService.success(res, { message: "Tarea eliminada exitosamente." }, 204); // 204 No Content
+            // 204 No Content no debe tener cuerpo en la respuesta
+            return res.status(204).send();
         } catch (error) {
-            ResponseService.serverError(res, "Error al eliminar la tarea.");
+            console.error("Error en delete API:", error);
+            ResponseService.serverError(res, `Error al eliminar la tarea: ${error.message}`);
         }
     };
     
