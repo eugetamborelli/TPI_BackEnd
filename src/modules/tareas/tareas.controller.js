@@ -73,8 +73,9 @@ class TareasController {
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
-                error,
-                busqueda 
+                error: req.query.error || null,
+                busqueda,
+                successMsg: req.query.msg || null
             });
 
         } catch (e) {
@@ -87,6 +88,7 @@ class TareasController {
                 estados: ESTADOS_VALIDOS,
                 prioridades: PRIORIDADES_VALIDAS,
                 areas: AREAS_VALIDAS,
+                successMsg: null
             });
         }
     };
@@ -119,7 +121,6 @@ class TareasController {
 
     editTarea = async (req, res) => {
         const tareaId = req.params.id;
-        
         try {
             const tareaActualizada = await updateTarea(tareaId, req.body);
             

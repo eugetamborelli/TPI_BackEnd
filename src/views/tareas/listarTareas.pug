@@ -98,6 +98,8 @@ html
                         th Prioridad
                         th Empleado ID
                         th Paciente ID
+                        th Proveedor ID
+                        th Observaciones
                         th Inicio
                         th Finalización
                         th Acciones
@@ -110,6 +112,8 @@ html
                             td= tarea.prioridad.toUpperCase()
                             td= tarea.empleadoId || '-'
                             td= tarea.pacienteId || '-'
+                            td= tarea.proveedorId || '-'
+                            td= tarea.observaciones || '-'
                             td= formatDate(tarea.fechaInicio) || '-'
                             td= formatDate(tarea.fechaFin) || '-'
                             td
@@ -117,7 +121,7 @@ html
                                 a(href=`/tareas/editar/${tarea._id}`)
                                     button(type="button") Editar
                                 // Botón para Eliminar
-                                form(action=`/tareas/${tarea._id}` method="POST" style="display:inline;")
+                                form(action=`/tareas/eliminar/${tarea._id}` method="POST" style="display:inline;")
                                     input(type="hidden" name="_method" value="DELETE")
                                     button(type="submit", onclick="return confirm('¿Está seguro de eliminar esta tarea?');") Eliminar
         else

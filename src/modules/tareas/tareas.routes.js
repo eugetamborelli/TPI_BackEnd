@@ -18,12 +18,12 @@ router.post("/",
     validarCuerpoNoVacio,
     tareasController.addTarea
 );
-router.patch("/:id",
+router.post("/:id",
     validarId,
     validarCuerpoNoVacio,
     tareasController.editTarea 
 );
-router.delete("/:id", validarId, tareasController.removeTarea);
+router.post("/eliminar/:id", validarId, tareasController.removeTarea);
 
 // *** Filtros ***
 router.get("/api/tareas", tareasController.getTareas); 
