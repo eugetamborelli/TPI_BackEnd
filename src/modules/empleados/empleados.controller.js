@@ -1,114 +1,209 @@
 import EmpleadosModel from "./empleados.model.js";
+import BaseController from "../../common/base/base.controller.js";
 
-const model = new EmpleadosModel();
+// Listas predeterminadas
+const ROLES = [
+  "médico", "enfermera", "recepcionista", "administrador",
+  "encargado de stock", "laboratorista", "kinesiólogo"
+];
 
-class EmpleadosController {
-  // CRUD
-  getEmpleados = (req, res) => {
-    try {
-      res.json(model.getAll());
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleados" });
+const AREAS = [
+  "Atención Médica", "Pediatría", "Emergencias", "Administración de Turnos",
+  "Facturación", "Stock de Insumos", "Laboratorio", "Enfermería"
+];
+
+class EmpleadosController extends BaseController {
+    constructor() {
+        super(new EmpleadosModel());
+        this.ROLES = ROLES;
+        this.AREAS = AREAS;
     }
-  };
 
-  getEmpleado = (req, res) => {
-    try {
-      const emp = model.getById(req.params.id);
-      if (!emp) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json(emp);
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleado" });
-    }
-  };
-
-  addEmpleado = (req, res) => {
-    try {
-      const { id, nombre, apellido, dni, rol, area } = req.body;
-
-      // Validación de campos obligatorios
-      if (!nombre || !apellido || !dni || !rol || !area) {
-        return res
-          .status(400)
-          .json({ error: "Campos obligatorios: nombre, apellido, dni, rol, area" });
-      }
-
-      const nuevo = model.create({ id, nombre, apellido, dni, rol, area });
-      if (!nuevo) {
-        // Conflicto por id o dni repetido
-        return res.status(409).json({ error: "ID o DNI ya existente" });
-      }
-
-      res.status(201).json(nuevo);
-    } catch (err) {
-      res.status(500).json({ error: "Error al crear empleado" });
-    }
-  };
-
-  editEmpleado = (req, res) => {
-    try {
-      const { id } = req.params;
-      let empleado;
-
-      if (!isNaN(id)) {
-        empleado = model.getById(Number(id));
-        if (!empleado) {
-          empleado = model.getByDni(id);
+    // Resuelve si el ID es numérico o DNI y retorna el empleado.
+    async _findEmpleado(id) {
+        let empleado = null;
+        if (!isNaN(id)) {
+            empleado = await this.model.getById(Number(id));
         }
-      } else {
-        empleado = model.getByDni(id);
-      }
 
-      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
-
-      const emp = model.update(empleado.id, req.body);
-      if (!emp) return res.status(400).json({ error: "DNI en uso" });
-      res.json(emp);
-    } catch (err) {
-      res.status(400).json({ error: "Error al actualizar empleado" });
+        if (!empleado) {
+            empleado = await this.model.getByDni(id);
+        }
+        return empleado;
     }
-  };
 
+    // --- Views ---
 
-  removeEmpleado = (req, res) => {
-    try {
-      const ok = model.remove(req.params.id);
-      if (!ok) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json({ message: "Empleado eliminado" });
-    } catch (err) {
-      res.status(500).json({ error: "Error al eliminar empleado" });
-    }
-  };
+    renderDashboard = (req, res) => {
+        res.render("empleados/dashboard", { titulo: "Gestión de Empleados" });
+    };
 
-  // Filtros
-  getEmpleadosByRol = (req, res) => {
-    try {
-      const { rol } = req.params;
-      res.json(model.filterByRol(rol));
-    } catch (err) {
-      res.status(500).json({ error: "Error al filtrar por rol" });
-    }
-  };
+    renderNuevoEmpleado = (req, res) => {
+        res.render("empleados/nuevoEmpleado", { 
+            titulo: "Alta de empleado", 
+            formData: {}, 
+            ROLES: this.ROLES, 
+            AREAS: this.AREAS 
+        });
+    };
+    
+    // --- Listado y Filtro  ---
 
-  getEmpleadosByArea = (req, res) => {
-    try {
-      const { area } = req.params;
-      res.json(model.filterByArea(area));
-    } catch (err) {
-      res.status(500).json({ error: "Error al filtrar por área" });
-    }
-  };
+    getEmpleadosListado = async (req, res) => {
+        try {
+            let empleados = await this.model.getAll();
 
-  getEmpleadoByDni = (req, res) => {
-    try {
-      const { dni } = req.params;
-      const empleado = model.getByDni(dni);
-      if (!empleado) return res.status(404).json({ error: "Empleado no encontrado" });
-      res.json(empleado);
-    } catch (err) {
-      res.status(500).json({ error: "Error al obtener empleado" });
-    }
-  };
+            const rawDni = req.query.dni ?? "";
+            const rawRol = req.query.rol ?? "";
+
+            const dni = String(rawDni).trim();
+            const rol = String(rawRol).trim().toLowerCase();
+
+            if (dni) {
+                empleados = empleados.filter((e) => String(e.dni) === dni);
+            } else if (rol) {
+                empleados = empleados.filter((e) => (e.rol || "").toLowerCase() === rol);
+            }
+
+            res.render("empleados/listado", {
+                empleados,
+                dniBusqueda: dni,
+                rolBusqueda: rawRol,
+                ROLES: this.ROLES,
+                AREAS: this.AREAS
+            });
+        } catch (error) {
+            res.render("empleados/listado", {
+                empleados: [],
+                error: error.message,
+                dniBusqueda: req.query.dni ?? "",
+                rolBusqueda: req.query.rol ?? "",
+                ROLES: this.ROLES,
+                AREAS: this.AREAS
+            });
+        }
+    };
+
+    // --- CRUD ---
+
+    addEmpleado = async (req, res) => {
+        try {
+            const {
+                nombre, apellido, dni, rol, area
+            } = req.body;
+
+            if (!this.ROLES.includes(rol)) {
+                throw new Error("Rol inválido");
+            }
+            if (!this.AREAS.includes(area)) {
+                throw new Error("Área inválida");
+            }
+
+            await this.model.create({
+                ...req.body,
+                activo: !!req.body.activo,
+                telefono: req.body.telefono || "",
+                email: req.body.email || "",
+                fechaAlta: req.body.fechaAlta || "",
+            });
+
+            res.redirect("/empleados/listado");
+        } catch (error) {
+            res.status(400).render("empleados/nuevoEmpleado", {
+                error: error.message,
+                formData: req.body || {},
+                ROLES: this.ROLES,
+                AREAS: this.AREAS
+            });
+        }
+    };
+
+    renderEditarEmpleado = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const empleado = await this._findEmpleado(id);
+
+            if (!empleado) return res.redirect("/empleados/listado");
+            
+            res.render("empleados/editarEmpleado", { 
+                empleado, 
+                ROLES: this.ROLES, 
+                AREAS: this.AREAS 
+            });
+        } catch {
+            res.redirect("/empleados/listado");
+        }
+    };
+
+    updateEmpleado = async (req, res) => {
+        const { id } = req.params;
+        const target = await this._findEmpleado(id);
+
+        if (!target) {
+            return res.status(400).render("empleados/editarEmpleado", {
+                error: "Empleado no encontrado",
+                empleado: { id, ...req.body },
+                ROLES: this.ROLES, 
+                AREAS: this.AREAS
+            });
+        }
+        
+        try {
+            const payload = { ...req.body };
+            
+            if (Object.prototype.hasOwnProperty.call(payload, "activo")) {
+                payload.activo = !!payload.activo;
+            }
+
+            if (payload.rol && !this.ROLES.includes(payload.rol)) {
+                throw new Error("Rol inválido");
+            }
+            if (payload.area && !this.AREAS.includes(payload.area)) {
+                throw new Error("Área inválida");
+            }
+            
+            const emp = await this.model.update(target.id, payload);
+            
+            if (!emp) {
+                throw new Error("Error al actualizar (DNI en uso o datos inválidos)");
+            }
+            
+            res.redirect("/empleados/listado");
+        } catch (error) {
+            res.status(400).render("empleados/editarEmpleado", {
+                error: error.message,
+                empleado: { id: target.id, ...req.body }, 
+                ROLES: this.ROLES, 
+                AREAS: this.AREAS
+            });
+        }
+    };
+
+    deleteEmpleado = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const target = await this._findEmpleado(id);
+
+            if (!target) {
+                throw new Error("Empleado no encontrado para la eliminación");
+            }
+            
+            const ok = await this.model.remove(target.id);
+            
+            if (!ok) {
+                throw new Error("No se pudo eliminar el empleado");
+            }
+
+            res.redirect("/empleados/listado");
+        } catch (error) {
+            res.render("empleados/listado", {
+                empleados: await this.model.getAll(),
+                error: error.message,
+                ROLES: this.ROLES, 
+                AREAS: this.AREAS
+            });
+        }
+    };
 }
 
-export default new EmpleadosController(); 
+export default new EmpleadosController();

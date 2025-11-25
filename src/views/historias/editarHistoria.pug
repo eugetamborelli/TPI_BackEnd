@@ -1,0 +1,78 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Historias Clínicas
+        br
+        ul
+            li
+                a(href="/historias/buscarHistoria") Búsqueda de Historia Clínica
+            li
+                a(href="/historias/nuevaHistoria") Alta de nueva Historia Clínica
+            li
+                a(href="/historias") Volver al Menú de Gestión de Historias Clínicas
+        br
+
+        h3 Ingresar nuevo evento a la Historia Clínica
+
+        if error
+            p(style="color:red")= error
+
+        //- El formulario de edición solo se muestra si hay un paciente y una historia
+        if paciente && historia
+            h4 Modificación de Historia Clínica para #{paciente.nombre} #{paciente.apellido}
+            p Fecha de Creación: #{historia.fechaCreacion}
+
+            form(method="POST", action="/historias/guardar")
+                //- Datos ocultos
+                input(type="hidden", name="dni", value=paciente.dni)
+                input(type="hidden", name="id", value=historia.id) 
+
+                //- Helper para repoblar
+                - const getValue = (field, historyData) => formData[field] !== undefined ? formData[field] : historyData || ''
+                
+                //- Observaciones
+                label(for="observaciones") Observaciones:
+                textarea(name="observaciones", id="observaciones")= getValue('observaciones', historia.observaciones)
+                br
+                br
+
+                //- Alergias
+                label(for="alergias") Alergias (separadas por coma):
+                - const alergiasStr = historia.alergias ? historia.alergias.join(", ") : ''
+                input(type="text", name="alergias", id="alergias", value=getValue('alergias', alergiasStr))
+                br
+                br
+
+                //- Medicamentos actuales
+                label(for="medicamentosActuales") Medicamentos actuales (separados por coma - Modelo: "Medicamento Dosis Frecuencia, ..."):
+                - const medsStr = historia.medicamentosActuales ? historia.medicamentosActuales.map(m => `${m.nombre} ${m.dosis} ${m.frecuencia}`).join(", ") : ''
+                input(type="text", name="medicamentosActuales", id="medicamentosActuales", value=getValue('medicamentosActuales', medsStr))
+                br
+
+                //- Antecedentes
+                h4 Antecedentes
+                
+                label Familiares (separados por coma):
+                - const famStr = historia.antecedentes && historia.antecedentes.familiares ? historia.antecedentes.familiares.join(", ") : ''
+                input(type="text", name="antecedentes_familiares", value=getValue('antecedentes_familiares', famStr))
+                br
+
+                label Personales (separados por coma):
+                - const persStr = historia.antecedentes && historia.antecedentes.personales ? historia.antecedentes.personales.join(", ") : ''
+                input(type="text", name="antecedentes_personales", value=getValue('antecedentes_personales', persStr))
+                br
+
+                label Quirúrgicos (separados por coma):
+                - const quirStr = historia.antecedentes && historia.antecedentes.quirurgicos ? historia.antecedentes.quirurgicos.join(", ") : ''
+                input(type="text", name="antecedentes_quirurgicos", value=getValue('antecedentes_quirurgicos', quirStr))
+                br
+
+                br
+                button(type="submit") Actualizar Historia Clínica
+        
+        else
+            p No se pudo cargar la Historia Clínica para edición. Por favor, intente nuevamente desde la 
+                a(href="/historias/buscarHistoria", style="font-weight:bold") Búsqueda.

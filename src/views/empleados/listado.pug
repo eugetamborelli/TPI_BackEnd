@@ -1,0 +1,76 @@
+doctype html
+html
+  head
+    title Clínica Médica - Salud Integral
+  body
+    h1 Clínica Médica - Salud Integral
+    h2 Gestión de Empleados
+    br
+    ul
+      li
+        a(href="/empleados/listado") Listado de Empleados
+      li
+        a(href="/empleados/nuevoEmpleado") Alta de empleados
+      li
+        a(href="/empleados") Volver al Menú de Gestión de Empleados
+    br
+
+    h3 Listado de Empleados
+
+    //- Búsqueda por DNI
+    form(method="GET", action="/empleados/listado")
+      label(for="dni") Buscar empleado por DNI:
+      input(type="text", name="dni", id="dni", value=dniBusqueda)
+      button(type="submit") Buscar
+
+    //- Filtro por Rol (con select)
+    form(method="GET", action="/empleados/listado" style="margin-top:10px")
+      label(for="rol") Filtrar por Rol:
+      select(name="rol" id="rol")
+        option(value="") -- Todos --
+        each r in ROLES
+          option(value=r selected=(rolBusqueda===r))= r
+      button(type="submit") Filtrar
+
+    hr
+
+    if error
+      p(style="color:red")= error
+
+    table(border="1" cellpadding="5" cellspacing="0")
+      thead
+        tr
+          th Nombre
+          th Apellido
+          th DNI
+          th Rol
+          th Área
+          th Teléfono
+          th Email
+          th Fecha de Alta
+          th Estado
+          th Acciones
+      tbody
+        if empleados && empleados.length
+          each emp in empleados
+            tr
+              td #{emp.nombre}
+              td #{emp.apellido}
+              td #{emp.dni}
+              td #{emp.rol}
+              td #{emp.area}
+              td #{emp.telefono || ''}
+              td #{emp.email || ''}
+              td #{emp.fechaAlta || ''}
+              td #{emp.activo ? 'Activo' : 'Inactivo'}
+              td
+                // Form GET para editar (soporta id o dni)
+                form(method="GET", action=`/empleados/editar/${emp.id || emp.dni}`, style="display:inline")
+                  button(type="submit") Modificar
+
+                // Form POST para eliminar (soporta id o dni)
+                form(action=`/empleados/${emp.id || emp.dni}?_method=DELETE`, method="POST", style="display:inline")
+                  button(type="submit") Eliminar
+        else
+          tr
+            td(colspan="10") No se encontraron empleados con esos filtros.

@@ -1,0 +1,71 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Historias Clínicas
+        br
+        ul
+            li
+                a(href="/historias/buscarHistoria") Búsqueda de Historia Clínica
+            li
+                a(href="/historias/nuevaHistoria") Alta de nueva Historia Clínica
+            li
+                a(href="/historias") Volver al Menú de Gestión de Historias Clínicas
+        br
+
+        h3 Alta de nueva Historia Clínica
+
+        if error
+            p(style="color:red")= error
+
+        //- Form para verificar paciente
+        form(method="GET" action="/historias/nuevaHistoria")
+            label(for="dni") Buscar paciente por DNI:
+            input(type="text" name="dni" id="dni" value=dniBusqueda)
+            button(type="submit") Verificar paciente
+
+        br
+
+        if paciente && !historia
+            h4 Nueva Historia Clínica para #{paciente.nombre} #{paciente.apellido}
+
+            form(method="POST", action="/historias/guardar")
+                //- DNI oculto
+                input(type="hidden", name="dni", value=paciente.dni)
+
+                //- Observaciones
+                label(for="observaciones") Observaciones:
+                textarea(name="observaciones", id="observaciones")
+                br
+                br
+
+                //- Alergias
+                label(for="alergias") Alergias (separadas por coma):
+                input(type="text", name="alergias", id="alergias")
+                br
+                br
+
+                //- Medicamentos actuales
+                label(for="medicamentosActuales") Medicamentos actuales (separados por coma - Seguir el modelo: "Medicamento Dosis Frecuencia, Medicamento Dosis Frecuencia"):
+                input(type="text", name="medicamentosActuales", id="medicamentosActuales")
+                br
+
+                //- Antecedentes
+                h4 Antecedentes
+                label Familiares (separados por coma):
+                input(type="text", name="antecedentes_familiares")
+                br
+
+                label Personales (separados por coma):
+                input(type="text", name="antecedentes_personales")
+                br
+
+                label Quirúrgicos (separados por coma):
+                input(type="text", name="antecedentes_quirurgicos")
+                br
+
+                br
+                button(type="submit") Guardar Historia
+

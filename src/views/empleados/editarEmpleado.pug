@@ -1,0 +1,69 @@
+doctype html
+html
+  head
+    title Clínica Médica - Salud Integral
+  body
+    h1 Clínica Médica - Salud Integral
+    h2 Gestión de Empleados
+    br
+    ul
+      li 
+        a(href="/empleados/listado") Listado de Empleados
+      li 
+        a(href="/empleados/nuevoEmpleado") Alta de empleados
+      li 
+        a(href="/empleados") Volver al Menú de Gestión de Empleados
+    br
+
+    h3 Modificación de datos del empleado
+
+    if error
+      p(style="color:red")= error
+
+    form(action=`/empleados/editar/${empleado.id}?_method=PATCH`, method="POST")
+      div
+        label(for="nombre") Nombre:
+        input(type="text" name="nombre" required value=(empleado && empleado.nombre))
+
+      div
+        label(for="apellido") Apellido:
+        input(type="text" name="apellido" required value=(empleado && empleado.apellido))
+
+      div
+        label(for="dni") DNI:
+        input(type="text" name="dni" value=(empleado && empleado.dni) readonly)
+
+      //- Rol con select
+      div
+        label(for="rol") Rol:
+        select(name="rol" required)
+          option(value="" disabled selected=!(empleado && empleado.rol)) Seleccioná un rol
+          each r in ROLES
+            option(value=r selected=(empleado && empleado.rol===r))= r
+
+      //- Área con select
+      div
+        label(for="area") Área:
+        select(name="area" required)
+          option(value="" disabled selected=!(empleado && empleado.area)) Seleccioná un área
+          each a in AREAS
+            option(value=a selected=(empleado && empleado.area===a))= a
+
+      div
+        label(for="telefono") Teléfono:
+        input(type="text" name="telefono" value=(empleado && empleado.telefono))
+
+      div
+        label(for="email") Email:
+        input(type="email" name="email" value=(empleado && empleado.email))
+
+      div
+        label(for="fechaAlta") Fecha de Alta:
+        input(type="date" name="fechaAlta" value=(empleado && empleado.fechaAlta))
+
+      div
+        label(for="activo") Activo:
+        input(type="checkbox" name="activo" checked=!!(empleado && empleado.activo))
+
+      br
+      button(type="submit") Actualizar Empleado

@@ -1,114 +1,119 @@
-import { readJsonFile, writeJsonFile } from "../../utils/file.utils.js";
-import { isDateInRange, ESTADOS_VALIDOS, PRIORIDADES_VALIDAS } from "./tareas.utils.js";
+import mongoose from 'mongoose';
+import TareaMongooseModel from './tarea.schema.js'; 
 
-class TareasModel {
-    constructor() {
-        this.fileName = "tareas";
+// *** CRUD ***
+
+export const getTareaById = async (id) => {
+    try {
+        const tarea = await TareaMongooseModel.findById(id).lean(); 
+        return tarea;
+    } catch(error) {
+        return null;
+    }
+};
+
+export const createTarea = async (tareaData) => {
+    try {
+        const newTarea = await TareaMongooseModel.create(tareaData); 
+        return newTarea;
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const updateTarea = async (id, tareaData) => {
+    try {
+        const updatedTarea = await TareaMongooseModel.findByIdAndUpdate(
+            id, 
+            tareaData, 
+            { new: true, runValidators: true } 
+        );
+        return updatedTarea; 
+    } catch (error) {
+        throw error;
+    }
+};
+
+export const deleteTarea = async (id) => {
+    try {
+        const result = await TareaMongooseModel.findByIdAndDelete(id);
+        return !!result; 
+    } catch (error) {
+        throw error;
+    }
+};
+
+// *** Búsqueda y Filtros Avanzados ***
+
+export const buscarTareas = async (filtros = {}) => {
+    const query = {};
+    const { estado, prioridad, empleadoId, pacienteId, inicio, fin, tipo = 'inicio' } = filtros;
+
+    // Validar y normalizar estado
+    if (estado) {
+        const estadoNormalizado = estado.toLowerCase();
+        query.estado = estadoNormalizado;
+    }
+    if (prioridad) {
+        const prioridadNormalizada = prioridad.toLowerCase();
+        query.prioridad = prioridadNormalizada;
+    }
+    
+    if (empleadoId) query.empleadoId = empleadoId;
+    if (pacienteId) query.pacienteId = pacienteId; 
+
+    // Validar y procesar fechas
+    if (inicio || fin) {
+        let fechaCampo = 'fechaInicio';
+        if (tipo === 'creacion') fechaCampo = 'createdAt';
+        if (tipo === 'finalizacion') fechaCampo = 'fechaFin';
+        
+        const fechaQuery = {};
+
+        if (inicio) {
+            // Parsear fecha en formato YYYY-MM-DD y crear inicio del día en hora local
+            const fechaInicioStr = String(inicio).trim();
+            if (!fechaInicioStr) {
+                throw new Error('Fecha de inicio no puede estar vacía.');
+            }
+            
+            // Si viene en formato YYYY-MM-DD, crear fecha al inicio del día en hora local
+            const fechaInicio = new Date(fechaInicioStr + 'T00:00:00');
+            if (isNaN(fechaInicio.getTime())) {
+                throw new Error('Fecha de inicio inválida. Debe ser una fecha válida.');
+            }
+            fechaQuery.$gte = fechaInicio;
+        }
+
+        if (fin) {
+            // Parsear fecha en formato YYYY-MM-DD y crear final del día en hora local
+            const fechaFinStr = String(fin).trim();
+            if (!fechaFinStr) {
+                throw new Error('Fecha de fin no puede estar vacía.');
+            }
+            
+            // Crear fecha al final del día (23:59:59.999) en hora local
+            const fechaFin = new Date(fechaFinStr + 'T23:59:59.999');
+            if (isNaN(fechaFin.getTime())) {
+                throw new Error('Fecha de fin inválida. Debe ser una fecha válida.');
+            }
+            fechaQuery.$lte = fechaFin; 
+        }
+
+        if (Object.keys(fechaQuery).length > 0) {
+            query[fechaCampo] = fechaQuery;
+        }
     }
 
-    leerArchivo = () => readJsonFile(this.fileName);
-    escribirArchivo = (datos) => writeJsonFile(this.fileName, datos);
-
-    validarTarea = (datos, esActualizacion = false) => {
-        if (!esActualizacion) {
-            const camposObligatorios = ['titulo', 'descripcion', 'estado', 'prioridad'];
-            const faltantes = camposObligatorios.filter(campo => !datos[campo]);
-            if (faltantes.length > 0) {
-                throw new Error(`Campos obligatorios faltantes: ${faltantes.join(', ')}`);
-            }
+    try {
+        const tareas = await TareaMongooseModel.find(query).lean();
+        return tareas;
+    } catch (error) {
+        // Preservar el error original si es un error de validación que lanzamos
+        if (error.message.includes('inválido') || error.message.includes('inválida')) {
+            throw error;
         }
-
-        if (datos.estado && !ESTADOS_VALIDOS.includes(datos.estado.toLowerCase())) {
-            throw new Error(`Estado inválido. Valores: ${ESTADOS_VALIDOS.join(', ')}`);
-        }
-
-        if (datos.prioridad && !PRIORIDADES_VALIDAS.includes(datos.prioridad.toLowerCase())) {
-            throw new Error(`Prioridad inválida. Valores: ${PRIORIDADES_VALIDAS.join(', ')}`);
-        }
-
-        if (datos.fechaInicio && datos.fechaFin && new Date(datos.fechaInicio) > new Date(datos.fechaFin)) {
-            throw new Error("La fecha de inicio no puede ser posterior a la fecha de fin");
-        }
-    };
-
-    obtenerTodas = () => this.leerArchivo();
-
-    obtenerPorId = (id) => this.leerArchivo().find(t => t.id === Number(id));
-
-    crear = (datos) => {
-        this.validarTarea(datos, false);
-
-        const tareas = this.leerArchivo();
-
-        const idNuevo = tareas.length > 0
-            ? tareas.reduce((maxId, t) => t.id > maxId ? t.id : maxId, 0) + 1
-            : 1;
-
-        const nuevaTarea = {
-            id: idNuevo,
-            titulo: datos.titulo.trim(),
-            descripcion: datos.descripcion.trim(),
-            estado: datos.estado.toLowerCase(),
-            prioridad: datos.prioridad.toLowerCase(),
-            empleadoId: datos.empleadoId ? Number(datos.empleadoId) : undefined,
-            pacienteId: datos.pacienteId ? Number(datos.pacienteId) : undefined,
-            fechaInicio: datos.fechaInicio,
-            fechaFin: datos.fechaFin,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-
-        tareas.push(nuevaTarea);
-        this.escribirArchivo(tareas);
-        return nuevaTarea;
-    };
-
-    actualizar = (id, datos) => {
-        this.validarTarea(datos, true);
-
-        const tareas = this.leerArchivo();
-        const indice = tareas.findIndex(t => t.id === Number(id));
-        if (indice === -1) return null;
-
-        const tareaActualizada = {
-            ...tareas[indice],
-            ...datos,
-            titulo: datos.titulo ? datos.titulo.trim() : tareas[indice].titulo,
-            descripcion: datos.descripcion ? datos.descripcion.trim() : tareas[indice].descripcion,
-            estado: datos.estado ? datos.estado.toLowerCase() : tareas[indice].estado,
-            prioridad: datos.prioridad ? datos.prioridad.toLowerCase() : tareas[indice].prioridad,
-            empleadoId: datos.empleadoId !== undefined ? Number(datos.empleadoId) : tareas[indice].empleadoId,
-            pacienteId: datos.pacienteId !== undefined ? Number(datos.pacienteId) : tareas[indice].pacienteId,
-            updatedAt: new Date().toISOString()
-        };
-
-        tareas[indice] = tareaActualizada;
-        this.escribirArchivo(tareas);
-        return tareaActualizada;
-    };
-
-    eliminar = (id) => {
-        const tareas = this.leerArchivo();
-        const tareasFiltradas = tareas.filter(t => t.id !== Number(id));
-
-        if (tareas.length === tareasFiltradas.length) return false;
-
-        this.escribirArchivo(tareasFiltradas);
-        return true;
-    };
-
-    filtrarPorEstado = (estado) => this.leerArchivo().filter(t => t.estado === estado.toLowerCase());
-    filtrarPorPrioridad = (prioridad) => this.leerArchivo().filter(t => t.prioridad === prioridad.toLowerCase());
-    filtrarPorEmpleado = (empleadoId) => this.leerArchivo().filter(t => t.empleadoId === Number(empleadoId));
-    filtrarPorPaciente = (pacienteId) => this.leerArchivo().filter(t => t.pacienteId === Number(pacienteId));
-    filtrarPorFecha = (inicio, fin, tipo = 'inicio') => {
-        const tareas = this.leerArchivo();
-        if (!inicio && !fin) return tareas;
-        return tareas.filter(t => {
-            const fecha = tipo === 'creacion' ? t.createdAt : tipo === 'finalizacion' ? t.fechaFin : t.fechaInicio;
-            return isDateInRange(fecha, inicio, fin);
-        });
-    };
-}
-
-export default TareasModel;
+        // Para errores de base de datos, lanzar con más contexto
+        throw new Error(`Error al ejecutar la búsqueda de tareas: ${error.message}`);
+    }
+};

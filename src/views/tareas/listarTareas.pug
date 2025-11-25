@@ -1,0 +1,127 @@
+doctype html
+html
+    head
+        title Clínica Médica - Salud Integral
+    body
+        h1 Clínica Médica - Salud Integral
+        h2 Gestión de Tareas
+        br
+        ul
+            li
+                a(href="/tareas/listado") Listado de Tareas
+            li 
+                a(href="/tareas/nuevaTarea") Alta de Tareas
+            li
+                a(href="/tareas") Volver al Menú de Gestión de Tareas
+        br
+        
+        if error
+            p(style="color:red; font-weight:bold;") Error en la búsqueda: #{error}
+        
+        if successMsg
+            p(style="color:green; font-weight:bold;") Éxito: #{successMsg}
+
+        //--- Formulario de Filtros 
+        h3 Filtrar Tareas
+        
+        form(action="/tareas/listado" method="GET")
+            h4 Filtros
+            
+            div
+                // Filtro por Estado
+                div
+                    label(for="estado") Estado:
+                    select(name="estado")
+                        option(value="") Todos
+                        each estadoVal in estados
+                            option(value=estadoVal, selected=(busqueda.estado === estadoVal))= estadoVal.replace(/_/g, ' ').toUpperCase()
+                
+                // Filtro por Prioridad
+                div
+                    label(for="prioridad") Prioridad:
+                    select(name="prioridad")
+                        option(value="") Todas
+                        each prioVal in prioridades
+                            option(value=prioVal, selected=(busqueda.prioridad === prioVal))= prioVal.toUpperCase()
+
+                // Filtro por Empleado
+                div
+                    label(for="empleadoId") Empleado ID:
+                    input(type="number" name="empleadoId" value=busqueda.empleadoId || '' min="1")
+                
+                // Filtro por Paciente
+                div
+                    label(for="pacienteId") Paciente ID:
+                    input(type="number" name="pacienteId" value=busqueda.pacienteId || '' min="1")
+
+            // Filtro por Rango de Fechas
+            div
+                h5 Rango de Fechas
+                div
+                    div
+                        label(for="tipo") Filtrar por:
+                        select(name="tipo")
+                            option(value="inicio", selected=(busqueda.tipo === 'inicio')) Fecha de Inicio
+                            option(value="finalizacion", selected=(busqueda.tipo === 'finalizacion')) Fecha de Fin
+                            option(value="creacion", selected=(busqueda.tipo === 'creacion')) Fecha de Creación
+                    
+                    div
+                        label(for="inicio") Desde:
+                        input(type="date" name="inicio" value=busqueda.inicio || '')
+                    
+                    div
+                        label(for="fin") Hasta:
+                        input(type="date" name="fin" value=busqueda.fin || '')
+                    
+                    button(type="submit") Aplicar Filtros
+                    
+                    // Botón para limpiar filtros
+                    a(href="/tareas/listado")
+                        button(type="button") Limpiar
+
+        hr
+
+        // --- Tabla de Resultados ---
+        h3 Resultados de la Búsqueda
+
+        if tareas && tareas.length > 0
+            table(border="1" cellpadding="5" cellspacing="0")
+                thead
+                    tr
+                        th Título
+                        th Área
+                        th Estado
+                        th Prioridad
+                        th Empleado ID
+                        th Paciente ID
+                        th Proveedor ID
+                        th Observaciones
+                        th Inicio
+                        th Finalización
+                        th Acciones
+                tbody
+                    each tarea in tareas
+                        tr
+                            td= tarea.titulo
+                            td= tarea.area.replace(/_/g, ' ').toUpperCase()
+                            td= tarea.estado.replace(/_/g, ' ').toUpperCase()
+                            td= tarea.prioridad.toUpperCase()
+                            td= tarea.empleadoId || '-'
+                            td= tarea.pacienteId || '-'
+                            td= tarea.proveedorId || '-'
+                            td= tarea.observaciones || '-'
+                            td= formatDate(tarea.fechaInicio) || '-'
+                            td= formatDate(tarea.fechaFin) || '-'
+                            td
+                                // Botón para Editar
+                                a(href=`/tareas/editar/${tarea._id}`)
+                                    button(type="button") Editar
+                                // Botón para Eliminar
+                                form(action=`/tareas/eliminar/${tarea._id}` method="POST" style="display:inline;")
+                                    input(type="hidden" name="_method" value="DELETE")
+                                    button(type="submit", onclick="return confirm('¿Está seguro de eliminar esta tarea?');") Eliminar
+        else
+            if Object.keys(busqueda).length > 0
+                p No se encontraron tareas que coincidan con los filtros aplicados.
+            else
+                p No hay tareas registradas en el sistema.

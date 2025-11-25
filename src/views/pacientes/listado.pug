@@ -17,12 +17,15 @@ html
 
         h3 Listado de Pacientes
 
+        if error
+            p(style="color:red")= error
+            
         //- Formulario de búsqueda por DNI
         form(method="GET", action="/pacientes/listado")
             label(for="dni") Buscar paciente por DNI:
             input(type="text", name="dni", id="dni", value=dniBusqueda)
-            button(type="submit") Buscar
-
+            button(type="submit") Buscar  
+        
         hr
 
         table(border="1" cellpadding="5" cellspacing="0")

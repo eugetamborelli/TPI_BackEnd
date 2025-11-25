@@ -2,38 +2,36 @@ import { Router } from "express";
 import tareasController from "./tareas.controller.js";
 import {
     validarCuerpoNoVacio,
-    validarId,
-    validarCamposObligatorios,
-    validarCamposOpcionales,
-    validarEstado,
-    validarPrioridad
+    validarId
 } from "./tareas.middleware.js";
 
 const router = Router();
 
-router.get("/fecha", tareasController.getTareasByFecha);
-router.get("/estado/:estado", tareasController.getTareasByEstado);
-router.get("/prioridad/:prioridad", tareasController.getTareasByPrioridad);
-router.get("/empleado/:empleadoId", tareasController.getTareasByEmpleado);
-router.get("/paciente/:pacienteId", tareasController.getTareasByPaciente);
+// *** Vistas ***
+router.get("/", tareasController.renderDashboard); 
+router.get("/listado", tareasController.renderListarTareas); 
+router.get("/nuevaTarea", tareasController.renderNuevaTarea);
+router.get("/editar/:id", validarId, tareasController.renderEditarTarea);
 
-router.get("/", tareasController.getTareas);
-router.get("/:id", validarId, tareasController.getTarea);
+// *** CRUD ***
 router.post("/",
     validarCuerpoNoVacio,
-    validarCamposObligatorios,
-    validarEstado,
-    validarPrioridad,
     tareasController.addTarea
 );
-router.patch("/:id",
+router.post("/:id",
     validarId,
     validarCuerpoNoVacio,
-    validarCamposOpcionales,
-    validarEstado,
-    validarPrioridad,
-    tareasController.editTarea
+    tareasController.editTarea 
 );
-router.delete("/:id", validarId, tareasController.removeTarea);
+router.post("/eliminar/:id", validarId, tareasController.removeTarea);
+
+// *** API REST ***
+router.get("/api/tareas", tareasController.getTareas); 
+router.get("/api/tareas/fecha", tareasController.getTareasByFecha);
+router.get("/api/tareas/:id", validarId, tareasController.getTarea);
+router.post("/api/tareas", validarCuerpoNoVacio, tareasController.create);
+router.put("/api/tareas/:id", validarId, validarCuerpoNoVacio, tareasController.update);
+router.patch("/api/tareas/:id", validarId, validarCuerpoNoVacio, tareasController.update);
+router.delete("/api/tareas/:id", validarId, tareasController.delete);
 
 export default router;
