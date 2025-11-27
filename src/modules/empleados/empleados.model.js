@@ -1,10 +1,8 @@
-// src/modules/empleados/empleados.model.js
 import EmpleadoMongooseModel from "./empleados.schema.js";
 import ValidationService from "../../common/services/validation.service.js";
 import { hashPassword } from "../auth/password.utils.js";
 import { isEmpleadoEmail } from "../auth/email-domain.utils.js";
 
-// ------- Helpers internos -------
 
 const normalizeDni = (dni) => String(dni);
 
@@ -35,10 +33,8 @@ const validateData = (empleado, isUpdate = false) => {
   const requiredFields = ["nombre", "apellido", "dni", "rol", "area"];
   ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
 
-  // DNI
   ValidationService.validateDni(empleado.dni);
 
-  // Email (si viene)
   ValidationService.validateEmail(empleado.email);
 
   if (empleado.email && !isEmpleadoEmail(empleado.email)) {
@@ -47,7 +43,6 @@ const validateData = (empleado, isUpdate = false) => {
     );
   }
 
-  // Password (si viene)
   if (empleado.password !== undefined) {
     if (
       typeof empleado.password !== "string" ||
@@ -58,7 +53,7 @@ const validateData = (empleado, isUpdate = false) => {
   }
 };
 
-// ------- CRUD + búsquedas (funciones nombradas, para EmpleadosController) -------
+// *** CRUD ***
 
 export const getEmpleadoById = async (id) => {
   try {
@@ -130,7 +125,6 @@ export const updateEmpleado = async (id, patchData) => {
     payload.password = await hashPassword(payload.password);
   }
 
-  // Fusionamos datos originales + patch para validar
   const toValidate = {
     ...existing.toObject(),
     ...payload,
@@ -161,12 +155,9 @@ export const filterByArea = async (area) => {
 };
 
 // ------- Clase para compatibilidad con Auth (export default) -------
-// Esto es lo que usa auth.controller.js con `new EmpleadosModel()`
-
 export default class EmpleadosModel {
   async getById(id) {
     const doc = await EmpleadoMongooseModel.findById(id).lean();
-    // Auth podría necesitar el password, así que acá NO lo limpiamos.
     return doc;
   }
 
@@ -175,17 +166,16 @@ export default class EmpleadosModel {
     const doc = await EmpleadoMongooseModel.findOne({
       dni: dniNormalizado,
     }).lean();
-    return doc; // sin limpiar password para login
+    return doc;
   }
 
   async findBy(field, value) {
     const query = { [field]: value };
     const docs = await EmpleadoMongooseModel.find(query).lean();
-    return docs; // auth usa [0] de este array
+    return docs;
   }
 
   async create(data) {
-    // Versión simple para compatibilidad si alguien la usa desde auth u otro lado
     return await EmpleadoMongooseModel.create(data);
   }
 

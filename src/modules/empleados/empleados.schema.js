@@ -4,7 +4,6 @@ import ContadorLegajo from "./contadorLegajo.model.js";
 
 const EmpleadoSchema = new Schema(
   {
-    // Legajo autoincremental, único
     legajo: {
       type: Number,
       unique: true,
@@ -64,16 +63,12 @@ const EmpleadoSchema = new Schema(
   }
 );
 
-// 🚀 Hook para asignar legajo autoincremental usando la colección ContadorLegajo
 EmpleadoSchema.pre("save", async function (next) {
-  // Si ya tiene legajo (por actualización, import, etc.), no tocamos
   if (this.legajo != null) return next();
 
   try {
-    // Buscamos el contador "legajo"
     let contador = await ContadorLegajo.findOne({ nombre: "legajo" });
 
-    // Si no existe, lo creamos en 0
     if (!contador) {
       contador = await ContadorLegajo.create({
         nombre: "legajo",
@@ -81,11 +76,9 @@ EmpleadoSchema.pre("save", async function (next) {
       });
     }
 
-    // Incrementamos en 1
     contador.valor += 1;
     await contador.save();
 
-    // Asignamos ese valor como legajo
     this.legajo = contador.valor;
 
     next();

@@ -4,14 +4,12 @@ import ResponseService from "../../common/services/response.service.js";
 export const validarCampos = (req, res, next) => {
     const { nombre, apellido, dni, rol, area } = req.body;
 
-    // Validar que haya al menos un campo para actualizar
     if (!nombre && !apellido && !dni && !rol && !area) {
         return ResponseService.badRequest(res, 
             "Debe proporcionar al menos un campo para actualizar: nombre, apellido, dni, rol, area"
         );
     }
 
-    // Validar campos no vacíos si se proporcionan
     const validations = [
         { field: nombre, name: "nombre" },
         { field: apellido, name: "apellido" },

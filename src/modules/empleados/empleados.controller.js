@@ -7,7 +7,6 @@ import {
   getEmpleadoById,
 } from "./empleados.model.js";
 
-// Listas predeterminadas (las mantenemos acá para las vistas)
 const ROLES = [
   "médico",
   "enfermera",
@@ -35,7 +34,7 @@ class EmpleadosController {
     this.AREAS = AREAS;
   }
 
-  // --- Views ---
+  // *** Views ***
 
   renderDashboard = (req, res) => {
     res.render("empleados/dashboard", { titulo: "Gestión de Empleados" });
@@ -50,7 +49,7 @@ class EmpleadosController {
     });
   };
 
-  // --- Listado + filtros (DNI / Rol) ---
+  // *** Listado + filtros (DNI / Rol) ***
 
   getEmpleadosListado = async (req, res) => {
     const rawDni = req.query.dni ?? "";
@@ -62,7 +61,6 @@ class EmpleadosController {
     try {
       const empleados = await buscarEmpleados({ dni, rol });
 
-      // Adaptamos para que las vistas sigan usando emp.id
       const empleadosView = empleados.map((e) => ({
         ...e,
         id: e._id ? String(e._id) : "",
@@ -87,7 +85,7 @@ class EmpleadosController {
     }
   };
 
-  // --- CRUD ---
+  // *** CRUD ***
 
   addEmpleado = async (req, res) => {
     try {
@@ -151,7 +149,6 @@ class EmpleadosController {
     try {
  const payload = { ...req.body };
 
-// No permitimos actualizar el legajo desde el formulario
 if ("legajo" in payload) {
   delete payload.legajo;
 }
@@ -208,7 +205,6 @@ if ("legajo" in payload) {
 
       res.redirect("/empleados/listado");
     } catch (error) {
-      // Si falla, intentamos mostrar listado con error
       let empleadosView = [];
       try {
         const empleados = await buscarEmpleados({});

@@ -21,7 +21,6 @@ html
       p(style="color:red")= error
 
     form(action=`/empleados/editar/${empleado.id}?_method=PATCH`, method="POST")
-      //- Legajo (solo lectura)
       div
         label(for="legajo") Legajo:
         input(

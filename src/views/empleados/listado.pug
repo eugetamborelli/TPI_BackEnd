@@ -15,6 +15,12 @@ html
         a(href="/empleados") Volver al Menú de Gestión de Empleados
     br
 
+    if error
+      p(style="color:red; font-weight:bold;") Error en la búsqueda: #{error}
+        
+    if successMsg
+      p(style="color:green; font-weight:bold;") Éxito: #{successMsg}
+
     h3 Listado de Empleados
 
     //- Búsqueda por DNI
