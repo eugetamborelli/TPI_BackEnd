@@ -21,49 +21,104 @@ html
       p(style="color:red")= error
 
     form(action=`/empleados/editar/${empleado.id}?_method=PATCH`, method="POST")
+      //- Legajo (solo lectura)
+      div
+        label(for="legajo") Legajo:
+        input(
+          type="text"
+          name="legajo"
+          id="legajo"
+          value=(empleado ? formatLegajo(empleado.legajo) : "")
+          readonly
+        )
+
       div
         label(for="nombre") Nombre:
-        input(type="text" name="nombre" required value=(empleado && empleado.nombre))
+        input(
+          type="text"
+          name="nombre"
+          id="nombre"
+          required
+          value=(empleado && empleado.nombre)
+        )
 
       div
         label(for="apellido") Apellido:
-        input(type="text" name="apellido" required value=(empleado && empleado.apellido))
+        input(
+          type="text"
+          name="apellido"
+          id="apellido"
+          required
+          value=(empleado && empleado.apellido)
+        )
 
       div
         label(for="dni") DNI:
-        input(type="text" name="dni" value=(empleado && empleado.dni) readonly)
+        input(
+          type="text"
+          name="dni"
+          id="dni"
+          value=(empleado && empleado.dni)
+          readonly
+        )
 
       //- Rol con select
       div
         label(for="rol") Rol:
-        select(name="rol" required)
+        select(name="rol" id="rol" required)
           option(value="" disabled selected=!(empleado && empleado.rol)) Seleccioná un rol
           each r in ROLES
-            option(value=r selected=(empleado && empleado.rol===r))= r
+            option(
+              value=r
+              selected=(empleado && empleado.rol === r)
+            )= r
 
       //- Área con select
       div
         label(for="area") Área:
-        select(name="area" required)
+        select(name="area" id="area" required)
           option(value="" disabled selected=!(empleado && empleado.area)) Seleccioná un área
           each a in AREAS
-            option(value=a selected=(empleado && empleado.area===a))= a
+            option(
+              value=a
+              selected=(empleado && empleado.area === a)
+            )= a
 
       div
         label(for="telefono") Teléfono:
-        input(type="text" name="telefono" value=(empleado && empleado.telefono))
+        input(
+          type="text"
+          name="telefono"
+          id="telefono"
+          value=(empleado && empleado.telefono)
+        )
 
       div
         label(for="email") Email:
-        input(type="email" name="email" value=(empleado && empleado.email))
+        input(
+          type="email"
+          name="email"
+          id="email"
+          value=(empleado && empleado.email)
+        )
 
       div
         label(for="fechaAlta") Fecha de Alta:
-        input(type="date" name="fechaAlta" value=(empleado && empleado.fechaAlta))
+        input(
+          type="date"
+          name="fechaAlta"
+          id="fechaAlta"
+          value=(empleado && empleado.fechaAlta)
+        )
 
       div
         label(for="activo") Activo:
-        input(type="checkbox" name="activo" checked=!!(empleado && empleado.activo))
+        input(
+          type="checkbox"
+          name="activo"
+          id="activo"
+          checked=!!(empleado && empleado.activo)
+        )
 
       br
       button(type="submit") Actualizar Empleado

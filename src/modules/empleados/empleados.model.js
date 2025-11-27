@@ -1,116 +1,215 @@
-import BaseModel from "../../common/base/base.model.js";
+// src/modules/empleados/empleados.model.js
+import EmpleadoMongooseModel from "./empleados.schema.js";
 import ValidationService from "../../common/services/validation.service.js";
 import { hashPassword } from "../auth/password.utils.js";
 import { isEmpleadoEmail } from "../auth/email-domain.utils.js";
 
-class EmpleadosModel extends BaseModel {
-  constructor() {
-    super("empleados");
+// ------- Helpers internos -------
+
+const normalizeDni = (dni) => String(dni);
+
+const cleanPassword = (empleadoDoc) => {
+  if (!empleadoDoc) return null;
+  const empleado = empleadoDoc.toObject ? empleadoDoc.toObject() : empleadoDoc;
+  const { password, ...empleadoLimpio } = empleado;
+  return empleadoLimpio;
+};
+
+const validateUniqueDni = async (dni, excludeId = null) => {
+  if (!dni) return;
+
+  const dniNormalizado = normalizeDni(dni);
+
+  const query = { dni: dniNormalizado };
+  if (excludeId) {
+    query._id = { $ne: excludeId };
   }
 
-  // Helper privado para normalizar DNI
-  _normalizeDni(dni) {
-    return String(dni);
+  const existing = await EmpleadoMongooseModel.findOne(query).lean();
+  if (existing) {
+    throw new Error("Ya existe un empleado con ese DNI");
   }
+};
 
-  // Helper privado para validar DNI único
-  async _validateUniqueDni(dni, excludeId = null) {
-    if (!dni) return;
+const validateData = (empleado, isUpdate = false) => {
+  const requiredFields = ["nombre", "apellido", "dni", "rol", "area"];
+  ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
 
-    const empleados = await this.getAll();
-    const dniNormalizado = this._normalizeDni(dni);
-    const existing = empleados.find(e =>
-      this._normalizeDni(e.dni) === dniNormalizado &&
-      (!excludeId || e.id !== excludeId)
+  // DNI
+  ValidationService.validateDni(empleado.dni);
+
+  // Email (si viene)
+  ValidationService.validateEmail(empleado.email);
+
+  if (empleado.email && !isEmpleadoEmail(empleado.email)) {
+    throw new Error(
+      "Los empleados deben tener email con dominio corporativo (ej: @saludintegral.com)"
     );
-
-    if (existing) {
-      throw new Error("Ya existe un empleado con ese DNI");
-    }
   }
 
-  validateData(empleado, isUpdate = false) {
-    const requiredFields = ['nombre', 'apellido', 'dni', 'rol', 'area'];
-    ValidationService.validateRequiredFields(empleado, requiredFields, isUpdate);
-
-    ValidationService.validateDni(empleado.dni);
-
-    // Validar email si se proporciona
-    ValidationService.validateEmail(empleado.email);
-
-    // Validar que el email tenga dominio corporativo (regla de negocio)
-    if (empleado.email && !isEmpleadoEmail(empleado.email)) {
-      throw new Error("Los empleados deben tener email con dominio corporativo (ej: @saludintegral.com)");
-    }
-
-    // Validar password si se proporciona
-    if (empleado.password !== undefined) {
-      if (typeof empleado.password !== 'string' || empleado.password.length < 6) {
-        throw new Error("La contraseña debe tener al menos 6 caracteres");
-      }
+  // Password (si viene)
+  if (empleado.password !== undefined) {
+    if (
+      typeof empleado.password !== "string" ||
+      empleado.password.length < 6
+    ) {
+      throw new Error("La contraseña debe tener al menos 6 caracteres");
     }
   }
+};
 
-  // Helper privado para eliminar la contraseña del objeto que retorna
-    _cleanPassword(empleado) {
-        if (!empleado) return null;
-        const { password, ...empleadoLimpio } = empleado;
-        return empleadoLimpio;
-    }
+// ------- CRUD + búsquedas (funciones nombradas, para EmpleadosController) -------
 
-  // *** CRUD ***
-  async create(empleado) {
-    await this._validateUniqueDni(empleado.dni);
+export const getEmpleadoById = async (id) => {
+  try {
+    const empleado = await EmpleadoMongooseModel.findById(id).lean();
+    return cleanPassword(empleado);
+  } catch {
+    return null;
+  }
+};
 
-    // Hashear password si se proporciona
-    if (empleado.password) {
-      empleado.password = await hashPassword(empleado.password);
-    }
+export const getEmpleadoByDni = async (dni) => {
+  const dniNormalizado = normalizeDni(dni);
+  const empleado = await EmpleadoMongooseModel.findOne({
+    dni: dniNormalizado,
+  }).lean();
+  return cleanPassword(empleado);
+};
 
-    const nuevoEmpleado = await super.create(empleado);
-    return this._cleanPassword(nuevoEmpleado);
+export const buscarEmpleados = async (filtros = {}) => {
+  const { dni, rol } = filtros;
+  const query = {};
+
+  const dniTrim = dni ? String(dni).trim() : "";
+  const rolTrim = rol ? String(rol).trim() : "";
+
+  if (dniTrim) {
+    query.dni = dniTrim;
+  } else if (rolTrim) {
+    query.rol = rolTrim;
   }
 
-  async update(id, patch) {
-    const empleado = await this.getById(id);
-    if (!empleado) return null;
+  const empleados = await EmpleadoMongooseModel.find(query).lean();
+  return empleados.map(cleanPassword);
+};
 
-    if (patch.dni !== undefined) {
-      this._validateUniqueDni(patch.dni, id);
-    }
+export const createEmpleado = async (empleadoData) => {
+  const payload = { ...empleadoData };
 
-    // Hashear password si se proporciona en el update
-    if (patch.password) {
-      patch.password = await hashPassword(patch.password);
-    }
+  // Normalizar campos
+  payload.dni = normalizeDni(payload.dni);
+  payload.telefono = payload.telefono || "";
+  payload.email = payload.email || "";
+  payload.fechaAlta = payload.fechaAlta || "";
+  payload.activo = !!payload.activo;
 
-    const empleadoActualizado = await super.update(id, patch);
-    return this._cleanPassword(empleadoActualizado);
+  await validateUniqueDni(payload.dni);
+  validateData(payload, false);
+
+  if (payload.password) {
+    payload.password = await hashPassword(payload.password);
   }
 
-  async remove(id) { 
-    return this.delete(id); 
+  const nuevo = await EmpleadoMongooseModel.create(payload);
+  return cleanPassword(nuevo);
+};
+
+export const updateEmpleado = async (id, patchData) => {
+  const existing = await EmpleadoMongooseModel.findById(id);
+  if (!existing) return null;
+
+  const payload = { ...patchData };
+
+  if (payload.dni !== undefined) {
+    payload.dni = normalizeDni(payload.dni);
+    await validateUniqueDni(payload.dni, id);
   }
 
-  async filterByRol(rol) {
-    const empleados = await super.filterBy('rol', rol);
-    return empleados.map(this._cleanPassword);
+  if (payload.password) {
+    payload.password = await hashPassword(payload.password);
   }
 
-  async filterByArea(area) {
-    const empleados = await super.filterBy('area', area);
-    return empleados.map(this._cleanPassword);
+  // Fusionamos datos originales + patch para validar
+  const toValidate = {
+    ...existing.toObject(),
+    ...payload,
+  };
+  validateData(toValidate, true);
+
+  const updated = await EmpleadoMongooseModel.findByIdAndUpdate(id, payload, {
+    new: true,
+    runValidators: true,
+  });
+
+  return cleanPassword(updated);
+};
+
+export const deleteEmpleado = async (id) => {
+  const result = await EmpleadoMongooseModel.findByIdAndDelete(id);
+  return !!result;
+};
+
+export const filterByRol = async (rol) => {
+  const empleados = await EmpleadoMongooseModel.find({ rol }).lean();
+  return empleados.map(cleanPassword);
+};
+
+export const filterByArea = async (area) => {
+  const empleados = await EmpleadoMongooseModel.find({ area }).lean();
+  return empleados.map(cleanPassword);
+};
+
+// ------- Clase para compatibilidad con Auth (export default) -------
+// Esto es lo que usa auth.controller.js con `new EmpleadosModel()`
+
+export default class EmpleadosModel {
+  async getById(id) {
+    const doc = await EmpleadoMongooseModel.findById(id).lean();
+    // Auth podría necesitar el password, así que acá NO lo limpiamos.
+    return doc;
   }
 
   async getByDni(dni) {
-    const empleado = await super.findBy('dni', String(dni))[0] || null;
-    return this._cleanPassword(empleado);
+    const dniNormalizado = normalizeDni(dni);
+    const doc = await EmpleadoMongooseModel.findOne({
+      dni: dniNormalizado,
+    }).lean();
+    return doc; // sin limpiar password para login
   }
 
-  async getById(id) {
-    const empleado = await super.getById(id);
-    return this._cleanPassword(empleado);
+  async findBy(field, value) {
+    const query = { [field]: value };
+    const docs = await EmpleadoMongooseModel.find(query).lean();
+    return docs; // auth usa [0] de este array
+  }
+
+  async create(data) {
+    // Versión simple para compatibilidad si alguien la usa desde auth u otro lado
+    return await EmpleadoMongooseModel.create(data);
+  }
+
+  async update(id, patch) {
+    return await EmpleadoMongooseModel.findByIdAndUpdate(id, patch, {
+      new: true,
+      runValidators: true,
+    });
+  }
+
+  async remove(id) {
+    const result = await EmpleadoMongooseModel.findByIdAndDelete(id);
+    return !!result;
+  }
+
+  async delete(id) {
+    return this.remove(id);
+  }
+
+  async filterByRol(rol) {
+    return await EmpleadoMongooseModel.find({ rol }).lean();
+  }
+
+  async filterByArea(area) {
+    return await EmpleadoMongooseModel.find({ area }).lean();
   }
 }
-
-export default EmpleadosModel;
