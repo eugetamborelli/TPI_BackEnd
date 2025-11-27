@@ -40,6 +40,7 @@ html
     table(border="1" cellpadding="5" cellspacing="0")
       thead
         tr
+          th legajo
           th Nombre
           th Apellido
           th DNI
@@ -54,6 +55,7 @@ html
         if empleados && empleados.length
           each emp in empleados
             tr
+              td #{formatLegajo(emp.legajo)}
               td #{emp.nombre}
               td #{emp.apellido}
               td #{emp.dni}
@@ -73,4 +75,4 @@ html
                   button(type="submit") Eliminar
         else
           tr
-            td(colspan="10") No se encontraron empleados con esos filtros.
+            td(colspan="11") No se encontraron empleados con esos filtros.
