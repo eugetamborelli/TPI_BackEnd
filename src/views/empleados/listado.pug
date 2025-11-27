@@ -34,9 +34,12 @@ html
       label(for="rol") Filtrar por Rol:
       select(name="rol" id="rol")
         option(value="") -- Todos --
-        each r in ROLES
+        each r in roles
           option(value=r selected=(rolBusqueda===r))= r
       button(type="submit") Filtrar
+      // Botón para limpiar filtros
+      a(href="/empleados/listado")
+        button(type="button") Limpiar
 
     hr
 
@@ -69,15 +72,16 @@ html
               td #{emp.area}
               td #{emp.telefono || ''}
               td #{emp.email || ''}
-              td #{emp.fechaAlta || ''}
+              td #{formatDate(emp.fechaAlta) || ''}
               td #{emp.activo ? 'Activo' : 'Inactivo'}
               td
                 // Form GET para editar (soporta id o dni)
-                form(method="GET", action=`/empleados/editar/${emp.id || emp.dni}`, style="display:inline")
+                form(method="GET", action=`/empleados/editar/${emp.id}`, style="display:inline")
                   button(type="submit") Modificar
 
                 // Form POST para eliminar (soporta id o dni)
-                form(action=`/empleados/${emp.id || emp.dni}?_method=DELETE`, method="POST", style="display:inline")
+                form(action=`/empleados/${emp.id}`, method="POST", style="display:inline")
+                  input(type="hidden" name="_method" value="DELETE")
                   button(type="submit") Eliminar
         else
           tr

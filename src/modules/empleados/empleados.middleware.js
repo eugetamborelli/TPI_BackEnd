@@ -1,4 +1,4 @@
-import ValidationService from "../../common/services/validation.service.js";
+/* import ValidationService from "../../common/services/validation.service.js";
 import ResponseService from "../../common/services/response.service.js";
 
 export const validarCampos = (req, res, next) => {
@@ -33,4 +33,4 @@ export const validarCampos = (req, res, next) => {
     }
 
     next();
-};
+}; */

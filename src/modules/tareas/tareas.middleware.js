@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 
 // Valida que el cuerpo de la solicitud no esté vacío
-// Compatible con vistas (render) y API (json)
+// Compatible con vistas y API
 export const validarCuerpoNoVacio = (req, res, next) => {
     if (!req.body || Object.keys(req.body).length === 0) {
         // Si es una petición API
@@ -19,7 +19,6 @@ export const validarCuerpoNoVacio = (req, res, next) => {
 export const validarId = (req, res, next) => {
     const id = req.params.id; 
 
-    // Verificación adicional para asegurar que el ID existe antes de validarlo
     if (!id) {
         if (req.path.startsWith('/api/') || req.headers.accept?.includes('application/json')) {
             return res.status(400).json({ error: "Parámetro ID faltante en la URL." });

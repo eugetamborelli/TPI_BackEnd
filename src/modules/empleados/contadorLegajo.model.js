@@ -1,4 +1,3 @@
-// src/modules/empleados/contadorLegajo.model.js
 import mongoose from "mongoose";
 
 const ContadorLegajoSchema = new mongoose.Schema({
