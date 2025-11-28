@@ -1,21 +1,26 @@
-import BaseController from "../../common/base/base.controller.js";
-import Paciente from "../pacientes/pacientes.model.js";
-import HistoriaClinicaModel from "./historiaClinica.model.js";
+import Paciente from "../pacientes/pacientes.model.js"; 
+import { 
+    getHistoriaByPacienteId, 
+    getHistoriaById,
+    createHistoria, 
+    updateHistoria,
+    deleteHistoria
+} from "./historiaClinica.model.js";
 import { 
     parseMedicamentos, 
-    parseAntecedentes,
-    parseAlergias } from "./historiaClinica.utils.js";
+    parseAntecedentes, 
+    parseAlergias 
+} from "./historiaClinica.utils.js";
 
 const pacienteModel = new Paciente();
-const historiaModel = new HistoriaClinicaModel();
 
-class HistoriaClinicaController extends BaseController {
+class HistoriaClinicaController {
+    
     constructor() {
-        super(historiaModel);
         this.pacienteModel = pacienteModel;
     }
 
-    // --- Vistas ---
+    // *** Vistas ***
 
     renderDashboard = (req, res) => {
         res.render("historias/dashboard", {
@@ -23,7 +28,6 @@ class HistoriaClinicaController extends BaseController {
         });
     };
 
-    //Búsqueda de Historia Clínica
     buscarHistoria = async (req, res) => {
         const { dni } = req.query;
         let error = null;
@@ -38,10 +42,10 @@ class HistoriaClinicaController extends BaseController {
                     throw new Error("No existe paciente con ese DNI.");
                 }
 
-                // Ultima historia
-                historia = await this.model.getByPacienteIdSingle(paciente.id);
+                historia = await getHistoriaByPacienteId(paciente.id);
 
                 if (!historia) error = "El paciente no tiene historia clínica registrada.";
+            
             } catch (err) {
                 error = err.message;
             }
@@ -77,14 +81,12 @@ class HistoriaClinicaController extends BaseController {
                 throw new Error("Paciente no encontrado.");
             }
 
-            // Si ya existe una historia, redirige a editar
-            const historiaExistente = await this.model.getByPacienteIdSingle(paciente.id);
+            const historiaExistente = await getHistoriaByPacienteId(paciente.id);
 
             if (historiaExistente) {
-                return res.redirect(`/historias/editarHistoria?dni=${dni}`);
+                return res.redirect(`/historias/editar/${historiaExistente._id}`);
             }
 
-            // Si no existe, muestra el formulario de alta
             return res.render("historias/nuevaHistoria", {
                 titulo: "Alta de Historia Clínica",
                 paciente,
@@ -104,29 +106,21 @@ class HistoriaClinicaController extends BaseController {
     };
 
     renderEditarHistoria = async (req, res) => {
-        const { dni } = req.query;
-        let paciente = null;
-        let historia = null;
-
-        if (!dni) {
-            return res.redirect("/historias/buscarHistoria");
-        }
+        const historiaId = req.params.id;
 
         try {
-            paciente = await this.pacienteModel.getPacienteByDni(dni);
+            const historia = await getHistoriaById(historiaId);
+
+            if (!historia) {
+                return res.redirect("/historias/buscarHistoria?error=Historia clínica no encontrada.");
+            }
+
+            const paciente = await this.pacienteModel.getById(historia.pacienteId);
 
             if (!paciente) {
-                throw new Error("Paciente no encontrado.");
+                throw new Error("Paciente asociado no encontrado.");
             }
 
-            historia = await this.model.getByPacienteIdSingle(paciente.id);
-
-            // Si no existe la historia, redirige a alta
-            if (!historia) {
-                return res.redirect(`/historias/nuevaHistoria?dni=${dni}`);
-            }
-
-            // Si existe la historia, muestra el formulario de edición
             return res.render("historias/editarHistoria", {
                 titulo: `Editar Historia de ${paciente.nombre} ${paciente.apellido}`,
                 paciente,
@@ -136,64 +130,111 @@ class HistoriaClinicaController extends BaseController {
             });
 
         } catch (error) {
-            return res.status(400).render("historias/editarHistoria", {
-                titulo: "Error de Edición",
-                paciente: null,
-                historia: null,
-                error: error.message,
-                formData: req.query
-            });
+            console.error("Error al renderizar edición:", error);
+            return res.redirect(`/historias/buscarHistoria?error=Error al cargar la edición: ${error.message}`);
         }
     };
 
-    guardarHistoria = async (req, res) => {
-        const { dni, id } = req.body; 
+    // *** CRUD ***
 
-        if (!dni) {
-            return res.render("historias/nuevaHistoria", {
-            error: "Se requiere DNI del paciente",
-            formData: req.body
-            });
-        }
+    create = async (req, res) => {
+        const { dni } = req.body; 
 
         try {
             const paciente = await this.pacienteModel.getPacienteByDni(dni);
-            if (!paciente) {
-                throw new Error("No existe un paciente con ese DNI. Realizar primero la carga del Paciente.");
-            }
+            if (!paciente) throw new Error("No existe un paciente con ese DNI.");
 
-            //Parseo de datos
             const data = {
-                pacienteId: paciente.id,
+                pacienteId: String(paciente.id),
                 observaciones: req.body.observaciones || "",
                 alergias: parseAlergias(req.body.alergias),
                 medicamentosActuales: parseMedicamentos(req.body.medicamentosActuales),
                 antecedentes: parseAntecedentes(req.body)
             };
 
-            let historiaFinal;
-            if (id) {
-                // UPDATE
-                historiaFinal = await this.model.updateHistoria(Number(id), data);
-            } else {
-                // CREATE
-                historiaFinal = await this.model.create(data);
-            }
+            await createHistoria(data);
 
-            // Redirige a la búsqueda para ver el resultado
-            res.redirect(`/historias/buscarHistoria?dni=${dni}`);
+            res.redirect(`/historias/buscarHistoria?dni=${dni}&msg=Historia creada correctamente.`);
+
         } catch (error) {
-            console.error("Error al guardar HC:", error);
+            console.error("Error al crear HC:", error);
             
-            const errorView = id ? "historias/editarHistoria" : "historias/nuevaHistoria";
-            const paciente = await this.pacienteModel.getPacienteByDni(dni); 
+            let pacienteInfo = null;
+            try { pacienteInfo = await this.pacienteModel.getPacienteByDni(dni); } catch {}
 
-            res.status(400).render(errorView, {
+            res.status(400).render("historias/nuevaHistoria", {
+                titulo: "Alta de Historia Clínica",
                 error: error.message,
-                paciente,
-                historia: id ? { id: Number(id) } : null, 
+                paciente: pacienteInfo,
+                historia: null, 
                 formData: req.body
             });
+        }
+    };
+
+    update = async (req, res) => {
+        const historiaId = req.params.id; 
+        const { dni } = req.body; 
+
+        try {
+            const data = {
+                observaciones: req.body.observaciones || "",
+                alergias: parseAlergias(req.body.alergias),
+                medicamentosActuales: parseMedicamentos(req.body.medicamentosActuales),
+                antecedentes: parseAntecedentes(req.body)
+            };
+
+            const historiaActualizada = await updateHistoria(historiaId, data);
+
+            if (!historiaActualizada) {
+                return res.status(404).redirect(`/historias/buscarHistoria?dni=${dni}&error=No se pudo actualizar. Historia no encontrada.`);
+            }
+
+            res.redirect(`/historias/buscarHistoria?dni=${dni}&msg=Historia actualizada correctamente.`);
+
+        } catch (error) {
+            console.error("Error al actualizar HC:", error);
+
+            let pacienteInfo = null;
+            let historiaOriginal = null;
+            try {
+                pacienteInfo = await this.pacienteModel.getPacienteByDni(dni);
+                historiaOriginal = await getHistoriaById(historiaId);
+            } catch {}
+
+            res.status(400).render("historias/editarHistoria", {
+                titulo: "Error de Edición",
+                error: error.message,
+                paciente: pacienteInfo,
+                historia: { ...historiaOriginal, ...req.body, _id: historiaId }, 
+                formData: req.body
+            });
+        }
+    };
+
+    delete = async (req, res) => {
+        const historiaId = req.params.id;
+        
+        try {
+            const historia = await getHistoriaById(historiaId);
+            let dniRedirect = "";
+
+            if (historia) {
+                const paciente = await this.pacienteModel.getById(historia.pacienteId);
+                if (paciente) dniRedirect = `?dni=${paciente.dni}`;
+            }
+
+            const deleted = await deleteHistoria(historiaId);
+
+            if (!deleted) {
+                return res.status(404).redirect(`/historias/buscarHistoria${dniRedirect}&error=Historia no encontrada.`);
+            }
+
+            res.redirect(`/historias/buscarHistoria${dniRedirect}&msg=Historia clínica eliminada.`);
+
+        } catch (error) {
+            console.error("Error al eliminar HC:", error);
+            res.status(500).redirect(`/historias/buscarHistoria?error=Error interno al eliminar.`);
         }
     };
 }
