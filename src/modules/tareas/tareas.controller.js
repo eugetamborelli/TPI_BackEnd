@@ -99,7 +99,7 @@ class TareasController {
         try {
             const nuevaTarea = await createTarea(req.body); 
             
-            res.redirect(`/tareas/listado?msg=Tarea%20${nuevaTarea._id}%20creada%20con%20éxito.`);
+            res.redirect(`/tareas/listado?msg=Tarea%20${nuevaTarea.numeroTarea}%20creada%20con%20éxito.`);
             
         } catch (error) {
             console.error("Error al crear tarea:", error);
@@ -130,7 +130,7 @@ class TareasController {
                 return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaId} no encontrada para actualizar.`);
             }
 
-            return res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada._id}%20actualizada%20con%20éxito.`);
+            return res.redirect(`/tareas/listado?msg=Tarea%20${tareaActualizada.numeroTarea}%20actualizada%20con%20éxito.`);
 
         } catch (error) {
             console.error("Error al editar tarea:", error);
@@ -164,12 +164,12 @@ class TareasController {
     removeTarea = async (req, res) => {
         const tareaId = req.params.id; 
         try {
-            const wasDeleted = await deleteTarea(tareaId);
+            const tareaEliminada = await deleteTarea(tareaId);
 
-            if (wasDeleted) {
-                return res.redirect(`/tareas/listado?msg=Tarea%20${tareaId}%20eliminada%20con%20éxito.`);
+            if (tareaEliminada) {
+                return res.redirect(`/tareas/listado?msg=Tarea%20${tareaEliminada.numeroTarea}%20eliminada%20con%20éxito.`);
             } else {
-                return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaId} no encontrada para eliminar.`);
+                return res.status(404).redirect(`/tareas/listado?error=Tarea ${tareaEliminada.numeroTarea} no encontrada para eliminar.`);
             }
         } catch (error) {
             console.error("Error al eliminar tarea:", error);

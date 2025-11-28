@@ -1,227 +1,186 @@
-// src/modules/empleados/empleados.controller.js
 import {
-  buscarEmpleados,
-  createEmpleado,
-  updateEmpleado,
-  deleteEmpleado,
-  getEmpleadoById,
-} from "./empleados.model.js";
-
-const ROLES = [
-  "médico",
-  "enfermera",
-  "recepcionista",
-  "administrador",
-  "encargado de stock",
-  "laboratorista",
-  "kinesiólogo",
-];
-
-const AREAS = [
-  "Atención Médica",
-  "Pediatría",
-  "Emergencias",
-  "Administración de Turnos",
-  "Facturación",
-  "Stock de Insumos",
-  "Laboratorio",
-  "Enfermería",
-];
-
-class EmpleadosController {
-  constructor() {
-    this.ROLES = ROLES;
-    this.AREAS = AREAS;
-  }
-
-  // *** Views ***
-
-  renderDashboard = (req, res) => {
-    res.render("empleados/dashboard", { titulo: "Gestión de Empleados" });
-  };
-
-  renderNuevoEmpleado = (req, res) => {
-    res.render("empleados/nuevoEmpleado", {
-      titulo: "Alta de empleado",
-      formData: {},
-      ROLES: this.ROLES,
-      AREAS: this.AREAS,
-    });
-  };
-
-  // *** Listado + filtros (DNI / Rol) ***
-
-  getEmpleadosListado = async (req, res) => {
-    const rawDni = req.query.dni ?? "";
-    const rawRol = req.query.rol ?? "";
-
-    const dni = String(rawDni).trim();
-    const rol = String(rawRol).trim();
-
-    try {
-      const empleados = await buscarEmpleados({ dni, rol });
-
-      const empleadosView = empleados.map((e) => ({
-        ...e,
-        id: e._id ? String(e._id) : "",
-      }));
-
-      res.render("empleados/listado", {
-        empleados: empleadosView,
-        dniBusqueda: dni,
-        rolBusqueda: rawRol,
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
+    buscarEmpleados,
+    createEmpleado,
+    updateEmpleado,
+    deleteEmpleado,
+    getEmpleadoById,
+  } from "./empleados.model.js";
+  
+  import { ROLES, AREAS } from "./empleados.utils.js"; 
+  
+  class EmpleadosController {
+  
+    // *** Views ***
+  
+    renderDashboard = (req, res) => {
+      return res.render("empleados/dashboard", { titulo: "Gestión de Empleados" });
+    };
+  
+    renderNuevoEmpleado = (req, res) => {
+      return res.render("empleados/nuevoEmpleado", {
+        titulo: "Alta de empleado",
+        formData: req.query || {}, 
+        roles: ROLES,
+        areas: AREAS,
       });
-    } catch (error) {
-      res.render("empleados/listado", {
-        empleados: [],
-        error: error.message,
-        dniBusqueda: dni,
-        rolBusqueda: rawRol,
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    }
-  };
-
-  // *** CRUD ***
-
-  addEmpleado = async (req, res) => {
-    try {
-      const { rol, area } = req.body;
-
-      if (!this.ROLES.includes(rol)) {
-        throw new Error("Rol inválido");
-      }
-      if (!this.AREAS.includes(area)) {
-        throw new Error("Área inválida");
-      }
-
-      await createEmpleado(req.body);
-
-      res.redirect("/empleados/listado");
-    } catch (error) {
-      res.status(400).render("empleados/nuevoEmpleado", {
-        error: error.message,
-        formData: req.body || {},
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    }
-  };
-
-  renderEditarEmpleado = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const empleado = await getEmpleadoById(id);
-
-      if (!empleado) return res.redirect("/empleados/listado");
-
-      const empleadoView = {
-        ...empleado,
-        id: empleado._id ? String(empleado._id) : "",
-      };
-
-      res.render("empleados/editarEmpleado", {
-        empleado: empleadoView,
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    } catch {
-      res.redirect("/empleados/listado");
-    }
-  };
-
-  updateEmpleado = async (req, res) => {
-    const { id } = req.params;
-    const target = await getEmpleadoById(id);
-
-    if (!target) {
-      return res.status(400).render("empleados/editarEmpleado", {
-        error: "Empleado no encontrado",
-        empleado: { id, ...req.body },
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    }
-
-    try {
- const payload = { ...req.body };
-
-if ("legajo" in payload) {
-  delete payload.legajo;
-}
-
-      if (Object.prototype.hasOwnProperty.call(payload, "activo")) {
-        payload.activo = !!payload.activo;
-      }
-
-      if (payload.rol && !this.ROLES.includes(payload.rol)) {
-        throw new Error("Rol inválido");
-      }
-      if (payload.area && !this.AREAS.includes(payload.area)) {
-        throw new Error("Área inválida");
-      }
-
-      const empActualizado = await updateEmpleado(id, payload);
-
-      if (!empActualizado) {
-        throw new Error("Error al actualizar (DNI en uso o datos inválidos)");
-      }
-
-      res.redirect("/empleados/listado");
-    } catch (error) {
-      res.status(400).render("empleados/editarEmpleado", {
-        error: error.message,
-        empleado: { id: target._id ? String(target._id) : id, ...req.body },
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    }
-  };
-
-  deleteEmpleado = async (req, res) => {
-    try {
-      const { id } = req.params;
-      const target = await getEmpleadoById(id);
-
-      if (!target) {
-        throw new Error("Empleado no encontrado para la eliminación");
-      }
-
-      const ok = await deleteEmpleado(id);
-
-      if (!ok) {
-        throw new Error("No se pudo eliminar el empleado");
-      }
-
-      const empleados = await buscarEmpleados({});
-
-      const empleadosView = empleados.map((e) => ({
-        ...e,
-        id: e._id ? String(e._id) : "",
-      }));
-
-      res.redirect("/empleados/listado");
-    } catch (error) {
-      let empleadosView = [];
-      try {
-        const empleados = await buscarEmpleados({});
-        empleadosView = empleados.map((e) => ({
-          ...e,
-          id: e._id ? String(e._id) : "",
+    };
+      
+    // Simplifica el mapeo de _id a id para la vista
+    _mapToView = (empleados) => {
+        if (!empleados) return [];
+        return empleados.map((e) => ({
+            ...e,
+            id: e._id ? String(e._id) : "",
         }));
-      } catch {}
+    };
+  
+    // *** Listado + filtros  ***
+  
+    getEmpleadosListado = async (req, res) => {
+      const rawDni = req.query.dni ?? "";
+      const rawRol = req.query.rol ?? "";
+      const successMsg = req.query.msg;
+  
+      const dni = String(rawDni).trim();
+      const rol = String(rawRol).trim();
+      const error = req.query.error;
+  
+      try {
+        const empleados = await buscarEmpleados({ dni, rol });
+  
+        return res.render("empleados/listado", {
+          empleados: this._mapToView(empleados),
+          dniBusqueda: dni,
+          rolBusqueda: rawRol,
+          roles: ROLES,
+          areas: AREAS,
+          successMsg: successMsg, 
+          error: error,
+        });
+      } catch (err) {
+        return res.render("empleados/listado", {
+          empleados: [],
+          error: `Error interno al cargar la lista: ${err.message}`,
+          dniBusqueda: dni,
+          rolBusqueda: rawRol,
+          roles: ROLES,
+          areas: AREAS,
+        });
+      }
+    };
+  
+    // *** CRUD ***
+  
+    addEmpleado = async (req, res) => {
+      try {
 
-      res.render("empleados/listado", {
-        empleados: empleadosView,
-        error: error.message,
-        ROLES: this.ROLES,
-        AREAS: this.AREAS,
-      });
-    }
-  };
-}
-
-export default new EmpleadosController();
+        const payload = { ...req.body };
+        if (payload.activo === 'on' || payload.activo === true) {
+          payload.activo = true;
+        } else {
+          payload.activo = false;
+        }
+        
+        const nuevoEmpleado = await createEmpleado(payload);
+  
+        return res.redirect(`/empleados/listado?msg=Empleado%20${nuevoEmpleado.legajo}%20creado%20con%20éxito.`);
+      } catch (error) {
+        let errorMessage = error.message;
+        if (error.name === 'ValidationError') {
+            errorMessage = Object.values(error.errors).map(val => val.message).join(' | ');
+        }
+  
+        return res.status(400).render("empleados/nuevoEmpleado", {
+          error: errorMessage,
+          formData: req.body || {},
+          roles: ROLES,
+          areas: AREAS,
+        });
+      }
+    };
+  
+    renderEditarEmpleado = async (req, res) => {
+      try {
+        const { id } = req.params;
+        const empleado = await getEmpleadoById(id);
+  
+        if (!empleado) return res.redirect("/empleados/listado?error=Empleado no encontrado.");
+  
+        const empleadoView = {
+          ...empleado,
+          id: empleado._id ? String(empleado._id) : "",
+        };
+  
+        return res.render("empleados/editarEmpleado", {
+          empleado: empleadoView,
+          roles: ROLES,
+          areas: AREAS,
+        });
+      } catch (error) {
+        return res.redirect(`/empleados/listado?error=Error al cargar la edición: ${error.message}`);
+      }
+    };
+  
+    updateEmpleado = async (req, res) => {
+      const { id } = req.params;
+      const { password, ...payload } = { ...req.body }; 
+  
+      try {
+          if (password) {
+              payload.password = password;
+          }
+          if ("legajo" in payload) {
+              delete payload.legajo;
+          }
+          if (Object.prototype.hasOwnProperty.call(req.body, "activo")) {
+              payload.activo = !!req.body.activo;
+          }
+          
+          const empActualizado = await updateEmpleado(id, payload);
+  
+          if (!empActualizado) {
+              return res.status(404).redirect(`/empleados/listado?error=Empleado con legajo ${empActualizado.legajo} no encontrado.`);
+          }
+  
+          return res.redirect(`/empleados/listado?msg=Empleado%20${empActualizado.legajo}%20actualizado%20con%20éxito.`);
+  
+      } catch (error) {
+          console.error("Error al actualizar empleado:", error);
+          
+          let errorMessage = error.message;
+          if (error.name === 'ValidationError') {
+              errorMessage = Object.values(error.errors).map(val => val.message).join(' | ');
+          }
+          
+          const empleadoOriginal = await getEmpleadoById(id);
+          
+          return res.status(400).render("empleados/editarEmpleado", {
+              titulo: `Error al editar #${id}`,
+              error: errorMessage,
+              empleado: { ...empleadoOriginal, ...req.body, id }, 
+              roles: ROLES,
+              areas: AREAS,
+          });
+      }
+    };
+  
+    deleteEmpleado = async (req, res) => {
+      const { id } = req.params; 
+  
+      try {
+          const empEliminado = await deleteEmpleado(id);
+  
+          if (!empEliminado) {
+              return res.status(404).redirect(`/empleados/listado?error=Empleado con ID ${id} no encontrado para la eliminación.`);
+          }
+  
+          return res.redirect(`/empleados/listado?msg=Empleado con legajo ${empEliminado.legajo} eliminado correctamente.`);
+          
+      } catch (error) {
+          console.error("Error al eliminar empleado:", error);
+          return res.status(500).redirect(`/empleados/listado?error=Error interno al eliminar el empleado: ${error.message}`);
+      }
+    };
+  }
+  
+  export default new EmpleadosController();

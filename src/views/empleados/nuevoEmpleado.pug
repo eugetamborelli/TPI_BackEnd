@@ -38,7 +38,7 @@ html
         label(for="rol") Rol:
         select(name="rol" required)
           option(value="" disabled selected=!(formData && formData.rol)) Seleccioná un rol
-          each r in ROLES
+          each r in roles
             option(value=r selected=(formData && formData.rol===r))= r
 
       //- Área con select
@@ -46,7 +46,7 @@ html
         label(for="area") Área:
         select(name="area" required)
           option(value="" disabled selected=!(formData && formData.area)) Seleccioná un área
-          each a in AREAS
+          each a in areas
             option(value=a selected=(formData && formData.area===a))= a
 
       div

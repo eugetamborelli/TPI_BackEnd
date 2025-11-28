@@ -23,49 +23,57 @@ html
         //- Form para verificar paciente
         form(method="GET" action="/historias/nuevaHistoria")
             label(for="dni") Buscar paciente por DNI:
-            input(type="text" name="dni" id="dni" value=dniBusqueda)
+            input(type="text" name="dni" id="dni" value=(dniBusqueda || (formData && formData.dni) || ''))
             button(type="submit") Verificar paciente
 
         br
 
+        //- Solo mostramos el formulario si hay paciente y NO tiene historia
         if paciente && !historia
             h4 Nueva Historia Clínica para #{paciente.nombre} #{paciente.apellido}
 
-            form(method="POST", action="/historias/guardar")
-                //- DNI oculto
+            form(method="POST", action="/historias")
+                
+                - const getValue = (field) => formData && formData[field] ? formData[field] : ''
+
                 input(type="hidden", name="dni", value=paciente.dni)
 
                 //- Observaciones
                 label(for="observaciones") Observaciones:
-                textarea(name="observaciones", id="observaciones")
+                textarea(name="observaciones", id="observaciones")= getValue('observaciones')
                 br
                 br
 
                 //- Alergias
                 label(for="alergias") Alergias (separadas por coma):
-                input(type="text", name="alergias", id="alergias")
+                input(type="text", name="alergias", id="alergias", value=getValue('alergias'))
                 br
                 br
 
                 //- Medicamentos actuales
-                label(for="medicamentosActuales") Medicamentos actuales (separados por coma - Seguir el modelo: "Medicamento Dosis Frecuencia, Medicamento Dosis Frecuencia"):
-                input(type="text", name="medicamentosActuales", id="medicamentosActuales")
+                label(for="medicamentosActuales") Medicamentos actuales (Modelo: "Nombre Dosis Frecuencia, ..."):
+                input(type="text", name="medicamentosActuales", id="medicamentosActuales", value=getValue('medicamentosActuales'))
                 br
 
                 //- Antecedentes
                 h4 Antecedentes
                 label Familiares (separados por coma):
-                input(type="text", name="antecedentes_familiares")
+                input(type="text", name="antecedentes_familiares", value=getValue('antecedentes_familiares'))
                 br
 
                 label Personales (separados por coma):
-                input(type="text", name="antecedentes_personales")
+                input(type="text", name="antecedentes_personales", value=getValue('antecedentes_personales'))
                 br
 
                 label Quirúrgicos (separados por coma):
-                input(type="text", name="antecedentes_quirurgicos")
+                input(type="text", name="antecedentes_quirurgicos", value=getValue('antecedentes_quirurgicos'))
                 br
 
                 br
                 button(type="submit") Guardar Historia
-
+        
+        else if paciente && historia
+            //- Si el paciente existe pero ya tiene historia, mostramos un aviso
+            p(style="color:blue") El paciente ya posee una Historia Clínica activa.
+            a(href=`/historias/editar/${historia._id}`) 
+                button(type="button") Ir a Editar Historia

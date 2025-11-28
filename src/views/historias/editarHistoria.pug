@@ -23,15 +23,13 @@ html
         //- El formulario de edición solo se muestra si hay un paciente y una historia
         if paciente && historia
             h4 Modificación de Historia Clínica para #{paciente.nombre} #{paciente.apellido}
-            p Fecha de Creación: #{historia.fechaCreacion}
-
-            form(method="POST", action="/historias/guardar")
-                //- Datos ocultos
+            
+            form(method="POST", action=`/historias/${historia._id}`)
+                
+                //- DNI para que el controlador sepa a dónde redirigir tras el update
                 input(type="hidden", name="dni", value=paciente.dni)
-                input(type="hidden", name="id", value=historia.id) 
-
-                //- Helper para repoblar
-                - const getValue = (field, historyData) => formData[field] !== undefined ? formData[field] : historyData || ''
+                
+                - const getValue = (field, historyData) => formData && formData[field] !== undefined ? formData[field] : historyData || ''
                 
                 //- Observaciones
                 label(for="observaciones") Observaciones:
@@ -47,7 +45,7 @@ html
                 br
 
                 //- Medicamentos actuales
-                label(for="medicamentosActuales") Medicamentos actuales (separados por coma - Modelo: "Medicamento Dosis Frecuencia, ..."):
+                label(for="medicamentosActuales") Medicamentos actuales (separados por coma - Modelo: "Nombre Dosis Frecuencia, ..."):
                 - const medsStr = historia.medicamentosActuales ? historia.medicamentosActuales.map(m => `${m.nombre} ${m.dosis} ${m.frecuencia}`).join(", ") : ''
                 input(type="text", name="medicamentosActuales", id="medicamentosActuales", value=getValue('medicamentosActuales', medsStr))
                 br

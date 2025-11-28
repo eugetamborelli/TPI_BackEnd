@@ -1,97 +1,120 @@
-import BaseController from "../../common/base/base.controller.js";
-import PacienteModel from "./pacientes.model.js";
+import {
+    getAllPacientes,
+    getPacienteByDni,
+    getPacienteById,
+    createPaciente,
+    updatePaciente,
+    deletePaciente,
+    buscarPacientes
+} from "./pacientes.model.js";
 
-class PacientesController extends BaseController {
-    constructor() {
-        super(new PacienteModel());
-    }
+class PacientesController {
 
-    // --- Vistas ---
+    // *** Vistas ***
 
     renderDashboard = (req, res) => {
         res.render("pacientes/dashboard", { titulo: "Gestión de Pacientes" });
     };
 
     renderNuevoPaciente = (req, res) => {
-        res.render("pacientes/nuevoPaciente", { titulo: "Alta de paciente", formData: {} });
+        res.render("pacientes/nuevoPaciente", { 
+            titulo: "Alta de paciente", 
+            formData: {},
+            error: req.query.error 
+        });
     };
 
     renderEditarPaciente = async (req, res) => {
+        // Buscamos por ID de Mongo (_id) que viene en la URL
+        const { id } = req.params; 
         try {
-            const paciente = await this.model.getPacienteByDni(req.params.dni);
+            const paciente = await getPacienteById(id);
+            if (!paciente) return res.redirect("/pacientes/listado?error=Paciente no encontrado");
+            
             res.render("pacientes/editarPaciente", { paciente });
         } catch (error) {
-            res.redirect("/pacientes/listado");
+            res.redirect("/pacientes/listado?error=Error al cargar paciente");
         }
     };
 
     getPacientesListado = async (req, res) => {
+        const { dni, msg, error } = req.query;
         try {
-            const { dni } = req.query;
-            let pacientes;
-
+            let pacientes = [];
             if (dni) {
-                try {
-                    const paciente = await this.model.getPacienteByDni(dni);
-                    pacientes = [paciente];
-                } catch {
-                    pacientes = [];
-                }
+                const paciente = await getPacienteByDni(dni);
+                if (paciente) pacientes = [paciente];
             } else {
-                pacientes = await this.model.getAll();
+                pacientes = await getAllPacientes();
             }
+            
+            const viewPacientes = pacientes.map(p => ({...p, id: p._id}));
 
-            res.render("pacientes/listado", { pacientes, dniBusqueda: dni || "" });
-        } catch (error) {
-            res.render("pacientes/listado", { pacientes: [], error: error.message });
+            res.render("pacientes/listado", { 
+                pacientes: viewPacientes, 
+                dniBusqueda: dni || "",
+                successMsg: msg,
+                error: error
+            });
+        } catch (err) {
+            res.render("pacientes/listado", { 
+                pacientes: [], 
+                error: "Error al cargar listado: " + err.message 
+            });
         }
     };
 
-    // --- CRUD Overrides  ---
+    // *** CRUD *** 
 
     addPaciente = async (req, res) => {
         try {
-            await this.model.create(req.body);
-            res.redirect("/pacientes/listado");
+            const nuevo = await createPaciente(req.body);
+            res.redirect(`/pacientes/listado?msg=Paciente ${nuevo.nombre} creado con éxito.`);
         } catch (error) {
+            let msg = error.message;
+            if (error.name === 'ValidationError') msg = Object.values(error.errors).map(e => e.message).join('. ');
+            
             res.status(400).render("pacientes/nuevoPaciente", {
-                error: error.message,
-                formData: req.body || {},
+                error: msg,
+                formData: req.body,
                 titulo: "Alta de paciente"
             });
         }
     };
 
     updatePaciente = async (req, res) => {
+        const { id } = req.params; // ID de Mongo
         try {
-            const id = await this.model.getIdByDni(req.params.dni);
-            await this.model.update(id, req.body);
-            res.redirect("/pacientes/listado");
+            const updated = await updatePaciente(id, req.body);
+            
+            if (!updated) return res.redirect("/pacientes/listado?error=Paciente no encontrado para actualizar");
+
+            res.redirect(`/pacientes/listado?msg=Paciente actualizado correctamente.`);
         } catch (error) {
-            try {
-                const pacienteOriginal = await this.model.getPacienteByDni(req.params.dni);
-                res.status(400).render("pacientes/editarPaciente", {
-                    error: error.message,
-                    paciente: { ...pacienteOriginal, ...req.body }
-                });
-            } catch (fatalError) {
-                res.redirect("/pacientes/listado");
-            }
+            let msg = error.message;
+            if (error.name === 'ValidationError') msg = Object.values(error.errors).map(e => e.message).join('. ');
+
+            // Recargar datos originales en caso de error
+            const original = await getPacienteById(id);
+            
+            res.status(400).render("pacientes/editarPaciente", {
+                error: msg,
+                // Combinamos original con body, asegurando mantener el _id correcto
+                paciente: { ...original, ...req.body, _id: id } 
+            });
         }
     };
 
     deletePaciente = async (req, res) => {
+        const { id } = req.params; // ID de Mongo
         try {
-            const id = await this.model.getIdByDni(req.params.dni);
-            await this.model.delete(id);
-            res.redirect("/pacientes/listado");
+            const deleted = await deletePaciente(id);
+            
+            if (!deleted) return res.redirect("/pacientes/listado?error=No se pudo eliminar el paciente (ID no encontrado).");
+            
+            res.redirect("/pacientes/listado?msg=Paciente eliminado correctamente.");
         } catch (error) {
-            const pacientes = await this.model.getAll();
-            res.render("pacientes/listado", { 
-                pacientes, 
-                error: "No se pudo eliminar: " + error.message,
-                dniBusqueda: "" 
-            });
+            res.redirect(`/pacientes/listado?error=Error al eliminar: ${error.message}`);
         }
     };
 }

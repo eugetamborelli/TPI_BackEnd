@@ -47,14 +47,14 @@ html
                         td #{paciente.nombre}
                         td #{paciente.apellido}
                         td #{paciente.dni}
-                        td #{paciente.fechaNacimiento}
-                        td #{paciente.telefono}
+                        td #{formatDate ? formatDate(paciente.fechaNacimiento) : paciente.fechaNacimiento}
+                        td #{paciente.telefono || ''}
                         td #{paciente.email}
-                        td #{paciente.direccion}
-                        td #{paciente.obraSocial}
-                        td #{paciente.fechaAlta}
+                        td #{paciente.direccion || ''}
+                        td #{paciente.obraSocial || ''}
+                        td #{formatDate(paciente.fechaAlta) || ''}
                         td
-                            a(href=`/pacientes/editar/${paciente.dni}`) 
-                                button Modificar
-                            form(action=`/pacientes/${paciente.dni}?_method=DELETE`, method="POST", style="display:inline")
+                            a(href=`/pacientes/editar/${paciente._id}`) 
+                                button(type="button") Modificar
+                            form(action=`/pacientes/${paciente._id}?_method=DELETE`, method="POST", style="display:inline")
                                 button(type="submit") Eliminar

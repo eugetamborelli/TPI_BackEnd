@@ -9,13 +9,13 @@ const router = Router();
 
 //Vistas
 router.get("/", pacientesController.renderDashboard);
+router.get("/listado", pacientesController.getPacientesListado);
 router.get("/nuevo-paciente", pacientesController.renderNuevoPaciente)
-router.get("/editar/:dni", pacientesController.renderEditarPaciente);
 
 //CRUD
-router.get("/listado", pacientesController.getPacientesListado);
+router.get("/editar/:id", pacientesController.renderEditarPaciente);
 router.post("/nuevo-paciente", pacientesController.addPaciente);
-router.patch("/editar/:dni", pacientesController.updatePaciente);
-router.delete("/:dni", pacientesController.deletePaciente);
+router.patch("/:id", pacientesController.updatePaciente);
+router.delete("/:id", pacientesController.deletePaciente);
 
 export default router;

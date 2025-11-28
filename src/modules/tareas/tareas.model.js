@@ -37,7 +37,7 @@ export const updateTarea = async (id, tareaData) => {
 export const deleteTarea = async (id) => {
     try {
         const result = await TareaMongooseModel.findByIdAndDelete(id);
-        return !!result; 
+        return result; 
     } catch (error) {
         throw error;
     }

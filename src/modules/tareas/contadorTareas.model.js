@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const ContadorLegajoSchema = new mongoose.Schema({
+const ContadorTareasSchema = new mongoose.Schema({
   nombre: {
     type: String,
     required: true,
@@ -12,6 +12,6 @@ const ContadorLegajoSchema = new mongoose.Schema({
   },
 });
 
-const ContadorLegajo = mongoose.model("ContadorLegajo", ContadorLegajoSchema);
+const ContadorTareas = mongoose.model("ContadorTareas", ContadorTareasSchema);
 
-export default ContadorLegajo;
+export default ContadorTareas;
