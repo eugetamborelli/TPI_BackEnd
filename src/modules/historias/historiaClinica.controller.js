@@ -39,7 +39,7 @@ class HistoriaClinicaController extends BaseController {
                 }
 
                 // Ultima historia
-                historia = await this.model.getByPacienteIdSingle(paciente.id);
+                historia = await this.model.getByPacienteIdSingle(paciente.pacienteId);
 
                 if (!historia) error = "El paciente no tiene historia clínica registrada.";
             } catch (err) {
@@ -78,7 +78,7 @@ class HistoriaClinicaController extends BaseController {
             }
 
             // Si ya existe una historia, redirige a editar
-            const historiaExistente = await this.model.getByPacienteIdSingle(paciente.id);
+            const historiaExistente = await this.model.getByPacienteIdSingle(paciente.pacienteId);
 
             if (historiaExistente) {
                 return res.redirect(`/historias/editarHistoria?dni=${dni}`);
@@ -119,7 +119,7 @@ class HistoriaClinicaController extends BaseController {
                 throw new Error("Paciente no encontrado.");
             }
 
-            historia = await this.model.getByPacienteIdSingle(paciente.id);
+            historia = await this.model.getByPacienteIdSingle(paciente.pacienteId);
 
             // Si no existe la historia, redirige a alta
             if (!historia) {
@@ -164,7 +164,7 @@ class HistoriaClinicaController extends BaseController {
 
             //Parseo de datos
             const data = {
-                pacienteId: paciente.id,
+                pacienteId: paciente.pacienteId,
                 observaciones: req.body.observaciones || "",
                 alergias: parseAlergias(req.body.alergias),
                 medicamentosActuales: parseMedicamentos(req.body.medicamentosActuales),
