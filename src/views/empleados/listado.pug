@@ -75,11 +75,9 @@ html
               td #{formatDate(emp.fechaAlta) || ''}
               td #{emp.activo ? 'Activo' : 'Inactivo'}
               td
-                // Form GET para editar (soporta id o dni)
                 form(method="GET", action=`/empleados/editar/${emp.id}`, style="display:inline")
                   button(type="submit") Modificar
 
-                // Form POST para eliminar (soporta id o dni)
                 form(action=`/empleados/${emp.id}?_method=DELETE`, method="POST", style="display:inline")
                   button(type="submit") Eliminar
         else
