@@ -1,4 +1,7 @@
-import Paciente from "../pacientes/pacientes.model.js"; 
+import { 
+    getPacienteByDni, 
+    getPacienteById 
+} from "../pacientes/pacientes.model.js";
 import { 
     getHistoriaByPacienteId, 
     getHistoriaById,
@@ -12,13 +15,8 @@ import {
     parseAlergias 
 } from "./historiaClinica.utils.js";
 
-const pacienteModel = new Paciente();
 
 class HistoriaClinicaController {
-    
-    constructor() {
-        this.pacienteModel = pacienteModel;
-    }
 
     // *** Vistas ***
 
@@ -36,14 +34,14 @@ class HistoriaClinicaController {
 
         if (dni) {
             try {
-                paciente = await this.pacienteModel.getPacienteByDni(dni); 
+                paciente = await getPacienteByDni(dni);
 
                 if (!paciente) {
                     throw new Error("No existe paciente con ese DNI.");
                 }
 
                 // Ultima historia
-                historia = await this.model.getByPacienteIdSingle(paciente.pacienteId);
+                historia = await getHistoriaByPacienteId(paciente.pacienteId);
 
                 if (!historia) error = "El paciente no tiene historia clínica registrada.";
             
@@ -76,14 +74,14 @@ class HistoriaClinicaController {
         }
 
         try {
-            paciente = await this.pacienteModel.getPacienteByDni(dni);
+            paciente = await getPacienteByDni(dni);
 
             if (!paciente) {
                 throw new Error("Paciente no encontrado.");
             }
 
             // Si ya existe una historia, redirige a editar
-            const historiaExistente = await this.model.getByPacienteIdSingle(paciente.pacienteId);
+            const historiaExistente = await getHistoriaByPacienteId(paciente.pacienteId);
 
             if (historiaExistente) {
                 return res.redirect(`/historias/editar/${historiaExistente._id}`);
@@ -117,7 +115,7 @@ class HistoriaClinicaController {
                 return res.redirect("/historias/buscarHistoria?error=Historia clínica no encontrada.");
             }
 
-            historia = await this.model.getByPacienteIdSingle(paciente.pacienteId);
+            const paciente = await getPacienteById(historia.pacienteId);
 
             if (!paciente) {
                 throw new Error("Paciente asociado no encontrado.");
@@ -143,11 +141,11 @@ class HistoriaClinicaController {
         const { dni } = req.body; 
 
         try {
-            const paciente = await this.pacienteModel.getPacienteByDni(dni);
+            const paciente = await getPacienteByDni(dni);
             if (!paciente) throw new Error("No existe un paciente con ese DNI.");
 
             const data = {
-                pacienteId: paciente.pacienteId,
+                pacienteId: String(paciente.pacienteId),
                 observaciones: req.body.observaciones || "",
                 alergias: parseAlergias(req.body.alergias),
                 medicamentosActuales: parseMedicamentos(req.body.medicamentosActuales),
@@ -200,7 +198,7 @@ class HistoriaClinicaController {
             let pacienteInfo = null;
             let historiaOriginal = null;
             try {
-                pacienteInfo = await this.pacienteModel.getPacienteByDni(dni);
+                pacienteInfo = await getPacienteByDni(dni);
                 historiaOriginal = await getHistoriaById(historiaId);
             } catch {}
 
@@ -218,11 +216,13 @@ class HistoriaClinicaController {
         const historiaId = req.params.id;
         
         try {
+            // Buscamos primero para saber a qué DNI redirigir
             const historia = await getHistoriaById(historiaId);
             let dniRedirect = "";
 
             if (historia) {
-                const paciente = await this.pacienteModel.getById(historia.pacienteId);
+                // Buscamos paciente por el ID guardado en la historia
+                const paciente = await getPacienteById(historia.pacienteId);
                 if (paciente) dniRedirect = `?dni=${paciente.dni}`;
             }
 
