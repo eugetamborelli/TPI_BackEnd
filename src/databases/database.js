@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = "mongodb+srv://eugeniatamborelli_db_user:clusterone@cluster0.xds5mff.mongodb.net/?appName=Cluster0";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 export const connectDB = async () => {
     if (!MONGODB_URI) {
