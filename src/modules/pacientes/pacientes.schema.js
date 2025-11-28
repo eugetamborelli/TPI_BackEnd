@@ -28,9 +28,8 @@ const PacienteSchema = new Schema(
       index: true,
     },
     fechaNacimiento: {
-      type: String,
+      type: Date,
       required: [true, "La fecha de nacimiento es obligatoria"],
-      trim: true,
     },
     telefono: {
       type: String,
@@ -41,6 +40,7 @@ const PacienteSchema = new Schema(
       type: String,
       trim: true,
       lowercase: true,
+      match: [/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/, 'Email inválido'],
     },
     direccion: {
       type: String,
@@ -51,11 +51,12 @@ const PacienteSchema = new Schema(
       trim: true,
     },
     fechaAlta: {
-      type: String,
-      trim: true,
+      type: Date,
+      default: Date.now,
     },
     historiaClinicaId: {
-      type: Number,
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'HistoriaClinica',
     },
     password: {
       type: String,
@@ -69,8 +70,6 @@ const PacienteSchema = new Schema(
 // Índice para búsquedas por email
 PacienteSchema.index({ email: 1 });
 
-// Pre-procesamiento antes de guardar en DB
-// Generación de pacienteId numérico (similar al legajo de empleados)
 PacienteSchema.pre("save", async function (next) {
   if (this.pacienteId != null) {
     if (typeof next === 'function') {
@@ -105,4 +104,3 @@ PacienteSchema.pre("save", async function (next) {
 const PacienteMongooseModel = mongoose.model("Paciente", PacienteSchema);
 
 export default PacienteMongooseModel;
-

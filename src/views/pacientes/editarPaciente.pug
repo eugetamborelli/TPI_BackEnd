@@ -20,7 +20,7 @@ html
         if error
             p(style="color:red")= error
 
-        form(action=`/pacientes/editar/${paciente.dni}?_method=PATCH`, method="POST")
+        form(action=`/pacientes/${paciente._id || paciente.id}?_method=PATCH`, method="POST")
             div
                 label(for="nombre") Nombre:
                 input(type="text" name="nombre" required value=paciente.nombre)

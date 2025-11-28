@@ -1,5 +1,4 @@
 import PacienteMongooseModel from "./pacientes.schema.js";
-import ValidationService from "../../common/services/validation.service.js";
 
 const normalizeDni = (dni) => String(dni).trim();
 
@@ -23,33 +22,6 @@ const validateUniqueDni = async (dni, excludeId = null) => {
   const existing = await PacienteMongooseModel.findOne(query).lean();
   if (existing) {
     throw new Error(`Ya existe un paciente con el DNI ${dni}`);
-  }
-};
-
-const validateData = (paciente, isUpdate = false) => {
-  const requiredFields = ["nombre", "apellido", "dni", "fechaNacimiento", "telefono"];
-  ValidationService.validateRequiredFields(paciente, requiredFields, isUpdate);
-
-  ValidationService.validateDni(paciente.dni);
-  
-  if (paciente.fechaNacimiento) {
-    ValidationService.validateDate(paciente.fechaNacimiento, false);
-  }
-  
-  if (paciente.email) {
-    ValidationService.validateEmail(paciente.email);
-  }
-  
-  if (paciente.telefono) {
-    ValidationService.validatePhone(paciente.telefono);
-  }
-
-  if (paciente.fechaAlta && paciente.fechaNacimiento) {
-    const nacimiento = new Date(paciente.fechaNacimiento);
-    const alta = new Date(paciente.fechaAlta);
-    if (alta < nacimiento) {
-      throw new Error("La fecha de alta no puede ser anterior a la fecha de nacimiento");
-    }
   }
 };
 
@@ -94,13 +66,9 @@ export const createPaciente = async (pacienteData) => {
   // Normalizar campos
   payload.dni = normalizeDni(payload.dni);
   payload.email = payload.email ? payload.email.trim().toLowerCase() : "";
-  payload.direccion = payload.direccion || "";
-  payload.obraSocial = payload.obraSocial || "";
-  payload.fechaAlta = payload.fechaAlta || "";
   payload.historiaClinicaId = payload.historiaClinicaId || null;
 
   await validateUniqueDni(payload.dni);
-  validateData(payload, false);
 
   const nuevo = await PacienteMongooseModel.create(payload);
   return cleanPassword(nuevo);
@@ -120,12 +88,6 @@ export const updatePaciente = async (id, patchData) => {
   if (payload.email) {
     payload.email = payload.email.trim().toLowerCase();
   }
-
-  const toValidate = {
-    ...existing.toObject(),
-    ...payload,
-  };
-  validateData(toValidate, true);
 
   const updated = await PacienteMongooseModel.findByIdAndUpdate(id, payload, {
     new: true,
@@ -156,7 +118,7 @@ export const buscarPacientes = async (filtros = {}) => {
   return pacientes.map(cleanPassword);
 };
 
-// ------- Clase para compatibilidad con Auth y otros módulos (export default) -------
+// ------- Clase para compatibilidad con Auth y otros módulos (export default) ------- TODO
 export default class Paciente {
   async getAll() {
     return await getAllPacientes();
