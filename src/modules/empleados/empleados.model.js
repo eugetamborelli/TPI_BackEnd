@@ -86,7 +86,7 @@ export const updateEmpleado = async (id, patchData) => {
 
 export const deleteEmpleado = async (id) => {
     const result = await EmpleadoMongooseModel.findByIdAndDelete(id);
-    return !!result;
+    return result;
 };
 
 // Búsqueda y Filtros

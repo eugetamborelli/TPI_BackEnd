@@ -80,8 +80,7 @@ html
                   button(type="submit") Modificar
 
                 // Form POST para eliminar (soporta id o dni)
-                form(action=`/empleados/${emp.id}`, method="POST", style="display:inline")
-                  input(type="hidden" name="_method" value="DELETE")
+                form(action=`/empleados/${emp.id}?_method=DELETE`, method="POST", style="display:inline")
                   button(type="submit") Eliminar
         else
           tr

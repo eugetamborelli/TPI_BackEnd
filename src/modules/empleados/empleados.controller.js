@@ -139,7 +139,7 @@ import {
           const empActualizado = await updateEmpleado(id, payload);
   
           if (!empActualizado) {
-              return res.status(404).redirect(`/empleados/listado?error=Empleado con ID ${id} no encontrado.`);
+              return res.status(404).redirect(`/empleados/listado?error=Empleado con legajo ${empActualizado.legajo} no encontrado.`);
           }
   
           return res.redirect(`/empleados/listado?msg=Empleado%20${empActualizado.legajo}%20actualizado%20con%20éxito.`);
@@ -168,13 +168,13 @@ import {
       const { id } = req.params; 
   
       try {
-          const ok = await deleteEmpleado(id);
+          const empEliminado = await deleteEmpleado(id);
   
-          if (!ok) {
-              return res.status(404).redirect(`/empleados/listado?error=Empleado ${id} no encontrado para la eliminación.`);
+          if (!empEliminado) {
+              return res.status(404).redirect(`/empleados/listado?error=Empleado con ID ${id} no encontrado para la eliminación.`);
           }
   
-          return res.redirect(`/empleados/listado?msg=Empleado%20${id}%20eliminado%20correctamente.`);
+          return res.redirect(`/empleados/listado?msg=Empleado con legajo ${empEliminado.legajo} eliminado correctamente.`);
           
       } catch (error) {
           console.error("Error al eliminar empleado:", error);
