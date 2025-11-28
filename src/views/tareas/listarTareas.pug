@@ -88,6 +88,7 @@ html
             table(border="1" cellpadding="5" cellspacing="0")
                 thead
                     tr
+                        th Número de Tarea
                         th Título
                         th Área
                         th Estado
@@ -102,6 +103,7 @@ html
                 tbody
                     each tarea in tareas
                         tr
+                            td= tarea.numeroTarea || '-'
                             td= tarea.titulo
                             td= tarea.area.replace(/_/g, ' ').toUpperCase()
                             td= tarea.estado.replace(/_/g, ' ').toUpperCase()

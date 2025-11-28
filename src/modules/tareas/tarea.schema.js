@@ -4,8 +4,13 @@ import {
     PRIORIDADES_VALIDAS, 
     AREAS_VALIDAS 
 } from './tareas.utils.js'; 
+import ContadorTareas from "./contadorTareas.model.js";
 
 const TareaSchema = new Schema({
+    numeroTarea: {
+        type: Number,
+        unique: true
+    },
     titulo: {
         type: String,
         required: [true, 'El título de la tarea es obligatorio.'],
@@ -65,6 +70,35 @@ const TareaSchema = new Schema({
     }
 }, {
     timestamps: true 
+});
+
+// Hook para Autoincrementar numeroTarea
+TareaSchema.pre("save", async function (next) {
+    if (this.numeroTarea != null) return next();
+
+    try {
+      // Buscamos el contador específico para tareas
+        let contador = await ContadorTareas.findOne({ nombre: "numeroTarea" });
+
+      // Si no existe, lo inicializamos
+        if (!contador) {
+        contador = await ContadorTareas.create({
+            nombre: "numeroTarea",
+            valor: 0,
+        });
+        }
+
+        // Incrementamos y guardamos
+        contador.valor += 1;
+        await contador.save();
+
+        // Asignamos el nuevo valor a la tarea actual
+        this.numeroTarea = contador.valor;
+
+        next();
+    } catch (error) {
+        next(error);
+    }
 });
 
 const TareaMongooseModel = mongoose.model('Tarea', TareaSchema);
