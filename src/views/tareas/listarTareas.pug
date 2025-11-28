@@ -119,7 +119,7 @@ html
                                 // Botón para Eliminar
                                 form(action=`/tareas/eliminar/${tarea._id}` method="POST" style="display:inline;")
                                     input(type="hidden" name="_method" value="DELETE")
-                                    button(type="submit", onclick="return confirm('¿Está seguro de eliminar esta tarea?');") Eliminar
+                                    button(type="submit") Eliminar
         else
             if Object.keys(busqueda).length > 0
                 p No se encontraron tareas que coincidan con los filtros aplicados.

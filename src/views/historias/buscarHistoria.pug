@@ -18,7 +18,11 @@ html
         h3 Búsqueda de Historia Clínica
 
         if error
-            p(style="color:red")= error
+            p(style="color:red; font-weight:bold")= error
+        
+        if query && query.msg
+            p(style="color:green; font-weight:bold")= query.msg
+
         //- Formulario de búsqueda por DNI
         form(method="GET", action="/historias/buscarHistoria")
             label(for="dni") Buscar paciente por DNI:
@@ -26,47 +30,71 @@ html
             button(type="submit") Buscar
 
         br
+        hr
 
         if paciente
             h2 Datos del Paciente
             p
                 strong Paciente: #{paciente.nombre} #{paciente.apellido}
             p DNI: #{paciente.dni}
-            p Fecha de Nacimiento: #{paciente.fechaNacimiento}
+            p Fecha de Nacimiento: #{formatDate ? formatDate(paciente.fechaNacimiento) : paciente.fechaNacimiento}
 
             if historia
-                h2 Historia Clínica Encontrada
-                p Fecha Creación: #{historia.fechaCreacion}
-                p Observaciones: #{historia.observaciones}
+                div(style="border: 1px solid #ccc; padding: 15px; margin-top: 20px;")
+                    h2 Historia Clínica ##{historia.numeroHistoria || '-'}
+                    p 
+                        strong Fecha Creación: 
+                        | #{formatDate ? formatDate(historia.fechaCreacion) : historia.fechaCreacion}
+                    p 
+                        strong Observaciones: 
+                        | #{historia.observaciones}
+                    
+                    h3 Alergias
+                    if historia.alergias && historia.alergias.length > 0
+                        ul
+                            each alergia in historia.alergias
+                                li #{alergia}
+                    else 
+                        p No registra alergias.
                 
-                h3 Alergias
-                ul
-                    each alergia in historia.alergias
-                        li #{alergia}
+                    h3 Medicamentos Actuales
+                    if historia.medicamentosActuales && historia.medicamentosActuales.length > 0
+                        ul
+                            each med in historia.medicamentosActuales
+                                li #{med.nombre} - #{med.dosis} - #{med.frecuencia}
+                    else
+                        p No registra medicamentos.
                 
-                h3 Medicamentos Actuales
-                ul
-                    each med in historia.medicamentosActuales
-                        li #{med.nombre} - #{med.dosis} - #{med.frecuencia}
-                
-                h3 Antecedentes
+                    h3 Antecedentes
                     ul
                         if historia.antecedentes.familiares && historia.antecedentes.familiares.length > 0
-                            li Familiares: #{historia.antecedentes.familiares.join(", ")}
+                            li 
+                                strong Familiares: 
+                                | #{historia.antecedentes.familiares.join(", ")}
+                        
                         if historia.antecedentes.personales && historia.antecedentes.personales.length > 0
-                            li Personales: #{historia.antecedentes.personales.join(", ")}
+                            li 
+                                strong Personales: 
+                                | #{historia.antecedentes.personales.join(", ")}
+                        
                         if historia.antecedentes.quirurgicos && historia.antecedentes.quirurgicos.length > 0
-                            li Quirúrgicos: #{historia.antecedentes.quirurgicos.join(", ")}
+                            li 
+                                strong Quirúrgicos: 
+                                | #{historia.antecedentes.quirurgicos.join(", ")}
                 
-                br
+                    br
+                    div(style="display: flex; gap: 10px;")
+                        a(href=`/historias/editar/${historia._id}`) 
+                            button(type="button") Editar Historia Clínica
 
-                //- Acción de Edición
-                a(href=`/historias/editarHistoria?dni=${paciente.dni}`) 
-                    button(type="button") Editar Historia Clínica
+                        form(action=`/historias/eliminar/${historia._id}`, method="POST", onsubmit="return confirm('¿Está seguro de eliminar esta Historia Clínica? Esta acción no se puede deshacer.');")
+                            button(type="submit") Eliminar Historia
                 
             else
-                //- Si el paciente existe pero no hay historia, alta
-                h2 No hay Historia Clínica Registrada
-                p Para crear la historia clínica inicial, haga click aquí:
+                //- Si el paciente existe pero no hay historia
+                div(style="margin-top: 20px;")
+                    h2 No hay Historia Clínica Registrada
+                    p Para crear la historia clínica inicial, haga click aquí:
+                    
                     a(href=`/historias/nuevaHistoria?dni=${paciente.dni}`)
                         button(type="button") Crear Historia Clínica

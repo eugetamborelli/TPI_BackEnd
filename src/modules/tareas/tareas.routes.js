@@ -14,15 +14,8 @@ router.get("/nuevaTarea", tareasController.renderNuevaTarea);
 router.get("/editar/:id", validarId, tareasController.renderEditarTarea);
 
 // *** CRUD ***
-router.post("/",
-    validarCuerpoNoVacio,
-    tareasController.addTarea
-);
-router.post("/:id",
-    validarId,
-    validarCuerpoNoVacio,
-    tareasController.editTarea 
-);
+router.post("/", validarCuerpoNoVacio, tareasController.addTarea);
+router.post("/:id", validarId, validarCuerpoNoVacio, tareasController.editTarea);
 router.post("/eliminar/:id", validarId, tareasController.removeTarea);
 
 // *** API REST ***
